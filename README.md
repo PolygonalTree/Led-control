@@ -18,5 +18,6 @@ TODO
 
 -Change Processing to Python + PySide?
 
+======
 
-Polygonal Tree 2013.
+Polygonal Tree 2013. License GPLv3.
