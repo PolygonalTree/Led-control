@@ -93,129 +93,13 @@ public void run(){
     }
     
     //Text to show that the experiment is running.
-    time = "The experiment starts at: "+ nf(day(),2)+"/"+nf(month(),2)+"/"+year()+
+    time = "The experiment started at: "+ nf(day(),2)+"/"+nf(month(),2)+"/"+year()+
                     " at "+nf(hour(),2)+":"+nf(minute(),2)+":"+nf(second(),2);
       
     
-    //prepare fir period and set ZT0.
-     Period PeriodZt0 = (Period) exp.get(1);
-       zt0 = PeriodZt0.switchOnTime[0]+(PeriodZt0.switchOnTime[1]/60.); //zt0 in hours.
+
     
-    //number of repetitions for period 0.
-    Period Period0 = (Period) exp.get(0);
-    int repetitions = Period0.repetitions;
-    
-    //first Period. ajustment to zt0
-    while (alreadyRunning == true){
-      Period firstPeriod = (Period) exp.get(0);
-      startHour = firstPeriod.switchOnTime[0]+(firstPeriod.switchOnTime[1]/60.);
-      endHour = firstPeriod.switchOffTime[0]+(firstPeriod.switchOffTime[1]/60.);
-      //Duration of the period greater than a day?
-      int firstPeriodDuration = firstPeriod.time * firstPeriod.repetitions;
-      
-      if(endHour == 0){
-         endHour = 23.999;
-      }
-      if (firstPeriod.isIntervalHours ==false){
-        messages = "No Adjustement";
-        sendDataToArduino(off);
-      }else{
-        if (firstPeriod.isAlwaysOn == true){
-          println("encendido");
-          messages = "Switch ON in period 0, mode LL";
-          sendDataToArduino(firstPeriod.ledColour);
-        }else if (firstPeriod.isAlwaysOff == true){
-          println("apagado");
-          messages = "Switch OFF in period 0, mode DD";
-          sendDataToArduino(off);
-        }else if(firstPeriod.isAlwaysOn != true
-                 && firstPeriod.isAlwaysOff != true
-                 && startHour <= hour()+minute()/60. && endHour >= hour()+minute()/60.){
-          println("encendido0");
-          messages = "Switch ON in period 0";
-          sendDataToArduino(firstPeriod.ledColour);
-        }else{
-          println("apagado0");
-          messages = "Switch OFF in period 0";
-          sendDataToArduino(off);
-        }
-      }
-      
-       //Old Control, replaced for the above.
-//       }else if(firstPeriod.isAlwaysOn != true
-//              && firstPeriod.isAlwaysOff != true
-//              && endHour <= hour()+minute()/60.){
-//         println("apagado0");
-//         messages = "Switch OFF in period 0";
-//         sendDataToArduino(off);
-//         if (firstPeriod.isIntervalHours ==false){
-//         messages = "No Adjustement";
-//         }
-//       }else if(firstPeriod.isAlwaysOn != true
-//              && firstPeriod.isAlwaysOff != true
-//              && startHour >= hour()+minute()/60.
-//              && endHour >= hour()+minute()/60.){
-//         println("apagado0");
-//         messages = "Switch OFF in period 0";
-//         sendDataToArduino(off);
-//         if (firstPeriod.isIntervalHours ==false){
-//         messages = "No Adjustement";
-//         }else{
-//         println("apagado00");
-//         messages = "Switch OFF in period 0. Error";
-//         sendDataToArduino(off);
-//       }
-       
-       if (firstPeriod.isIntervalHours == true){
-         if (firstPeriodDuration < 24 && hour()+minute()/60. >= zt0){
-           numberPeriod +=1;
-           break;
-         }
-         if (day()!= startTime[2] && hour()+minute()/60. >= zt0){
-           repetitions = repetitions-1;
-          // numberPeriod += 1;
-           startTime[2] = day();
-           if (numberPeriod > exp.size()-1){
-             println("Experiment ended");
-             messages = "Experiment Ended";
-             sendDataToArduino(off);
-             alreadyRunning = false;
-             threadArduino.interrupt();
-           }
-           if(repetitions < 1){
-             numberPeriod +=1;
-             break;
-           }  
-         }
-         
-       }else if(firstPeriod.isIntervalHours == false){
-         println("NO Adjustement");
-         numberPeriod +=1;
-          break;
-//        if (hour()+minute()/60. >= zt0){
-//            println(hour()+minute()/60.);
-//            println((zt0+firstPeriod.time/60.));
-//           repetitions = repetitions-1;
-//           //numberPeriod += 1;
-//           startTime[2] = day();
-//           if (numberPeriod > exp.size()-1){
-//             println("Experiment ended");
-//             messages = "Experiment Ended";
-//             sendDataToArduino(off);
-//             alreadyRunning = false;
-//             threadArduino.interrupt();
-//           }
-        //   if(repetitions == 1){
-         //    numberPeriod +=1;
-           //  break;
-          // }
-         //}
-       }
-    delay(60000);  
-    }
-    
-    
-    //Experiment. While Periods available this thread is running.
+    //Experiment. While Periods available this while loop is running.
     boolean periodChanged = true;
     
     while (alreadyRunning == true){
@@ -256,19 +140,40 @@ public void run(){
          println("apagado");
          messages = "Switch OFF in period "+numberPeriod+"mode DD";
          sendDataToArduino(off);
-       }       
+       }else if( startHour > endHour 
+                && endHour <= hour()+minute()/60. 
+                && startHour >= hour()+minute()/60.){
+         println("apagado");
+         messages = "Switch OFF in period "+numberPeriod+"mode LD";
+         sendDataToArduino(off);
+       }else if( startHour > endHour
+                && period.isAlwaysOn != true
+                && period.isAlwaysOff != true){
+                if(endHour <= hour()+minute()/60. 
+                   && startHour >= hour()+minute()/60.){
+                    println("apagado");
+                    messages = "Switch OFF in period "+numberPeriod+"mode LD";
+                    sendDataToArduino(off);
+                }else{
+                    println("encendido");
+                    messages = "Switch ON in period "+numberPeriod+"mode LD";
+                    sendDataToArduino(off);
+                }
+                
+        }       
+                
        
        if (period.isIntervalHours == true){
        //Change period. It changes if the hours passed from zt0 are equal to duration of period.
        if (expHours >= 0){
-           println(zt0+period.time/60.);
+
            expHours = expHours - 1/60.; //rest one minute from expHours.
             println("Hours change");
             print(expHours);
-           if (expHours == -1){
+           if (expHours < 0 ){
              numberPeriod += 1;
-             startTime[2] = day();
-             zt0 += period.time;
+             //startTime[2] = day();
+             //zt0 += period.time;
              periodChanged = true;
            }
            if (numberPeriod > exp.size()-1){
@@ -279,34 +184,15 @@ public void run(){
              threadArduino.interrupt();
            }
          }
-//         if (hour()+minute()/60. >= (zt0+period.time)){
-//           println(zt0+period.time/60.);
-//           expDays = expDays -1;
-//            println("Days change");
-//            print(expDays);
-//           if (expDays == -1){
-//             numberPeriod += 1;
-//             startTime[2] = day();
-//             zt0 += period.time;
-//             periodChanged = true;
-//           }
-//           if (numberPeriod > exp.size()-1){
-//             println("Experiment ended");
-//             messages = "Experiment Ended";
-//             alreadyRunning = false;
-//             threadArduino.interrupt();
-//           }
-//         }
        }else{
          if (expMinutes >= 0){
-           println(zt0+period.time/60.);
            expMinutes = expMinutes -1;
            println("Minutes change");
            println(expMinutes);
-           if(expMinutes == -1){
+           if(expMinutes < 0){
              numberPeriod += 1;
-             startTime[2] = day();
-             zt0 +=period.time/60.;
+             //startTime[2] = day();
+             //zt0 +=period.time/60.;
              periodChanged = true;
            }
            if (numberPeriod > exp.size()-1){
@@ -317,24 +203,7 @@ public void run(){
              threadArduino.interrupt();
          }
        }  
-//         if (hour()+minute()/60. >= (zt0+period.time/60.)){
-//           println(zt0+period.time/60.);
-//           expMinutes = expMinutes -1;
-//           println("Minutes change");
-//           println(expMinutes);
-//           if(expMinutes == -1){
-//             numberPeriod += 1;
-//             startTime[2] = day();
-//             zt0 +=period.time/60.;
-//             periodChanged = true;
-//           }
-//           if (numberPeriod > exp.size()-1){
-//             println("Experiment ended");
-//             messages = "Experiment Ended";
-//             alreadyRunning = false;
-//             threadArduino.interrupt();
-//         }
-//       }  
+
      }
        //wait one minute to save resources.
         delay(60000);
