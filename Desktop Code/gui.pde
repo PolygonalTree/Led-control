@@ -307,7 +307,7 @@ void removeDeleteButton(int i){
 void isRunning(){
     if (gui.get(Toggle.class,"Run").getValue() == 1.0 && alreadyRunning == false){
       fill(0);
-      String time ="The experiment starts at"+day()+"/"+month()+"/"+year()+
+      String time ="The experiment started at"+day()+"/"+month()+"/"+year()+
                     "at"+hour()+":"+minute()+":"+second();
       text(time,410,310);
       noFill();

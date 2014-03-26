@@ -40,21 +40,21 @@ String detectArduino(){
 
  }
  
- String readData(){
-   String data="";
-   delay(1000);
-   if (arduino.available() > 0){
-       data = arduino.readString();
-       }
-       return data;
- }
- 
+// String readData(){
+//   String data="";
+//   delay(1000);
+//   if (arduino.available() > 0){
+//      data = arduino.readString();
+//     }
+//       return data;
+// }
+// 
  
 void sendDataToArduino(int[] colour){
        String data = "R"+colour[0]+"G"+colour[1]+"B"+colour[2]+"W"+colour[3];
-       arduino.write(data);
+       //arduino.write(data);
        println(data);
-       String response = readData();
+       //String response = readData();
        println("readData");
      }
 
@@ -97,7 +97,100 @@ public void run(){
                     " at "+nf(hour(),2)+":"+nf(minute(),2)+":"+nf(second(),2);
       
     
+//prepare fir period and set ZT0.
+     Period PeriodZt0 = (Period) exp.get(1);
+       zt0 = PeriodZt0.switchOnTime[0]+(PeriodZt0.switchOnTime[1]/60.); //zt0 in hours.
+    
+    //number of repetitions for period 0.
+    Period Period0 = (Period) exp.get(0);
+    int repetitions = Period0.repetitions;
+    
+    //first Period. ajustment to zt0
+    while (alreadyRunning == true){
+      Period firstPeriod = (Period) exp.get(0);
+      startHour = firstPeriod.switchOnTime[0]+(firstPeriod.switchOnTime[1]/60.);
+      endHour = firstPeriod.switchOffTime[0]+(firstPeriod.switchOffTime[1]/60.);
+      //Duration of the period greater than a day?
+      int firstPeriodDuration = firstPeriod.time * firstPeriod.repetitions;
+      
+      if(endHour == 0){
+         endHour = 23.999;
+      }
+      if (firstPeriod.isIntervalHours ==false){
+        messages = "No Adjustement";
+        sendDataToArduino(off);
+      }else{
+        if (firstPeriod.isAlwaysOn == true){
+          println("encendido");
+          messages = "Switch ON in period 0, mode LL";
+          sendDataToArduino(firstPeriod.ledColour);
+        }else if (firstPeriod.isAlwaysOff == true){
+          println("apagado");
+          messages = "Switch OFF in period 0, mode DD";
+          sendDataToArduino(off);
+        }else if(firstPeriod.isAlwaysOn != true
+                 && firstPeriod.isAlwaysOff != true
+                 && startHour <= hour()+minute()/60. && endHour >= hour()+minute()/60.){
+          println("encendido0");
+          messages = "Switch ON in period 0";
+          sendDataToArduino(firstPeriod.ledColour);
+        }else if( startHour > endHour 
+                && endHour <= hour()+minute()/60. 
+                && startHour >= hour()+minute()/60.){
+         println("apagado");
+         messages = "Switch OFF in period "+numberPeriod+" mode LD";
+         sendDataToArduino(off);
+       }else if( startHour > endHour
+                && firstPeriod.isAlwaysOn != true
+                && firstPeriod.isAlwaysOff != true){
+                if(endHour <= hour()+minute()/60. 
+                   && startHour >= hour()+minute()/60.){
+                    println("apagado");
+                    messages = "Switch OFF in period "+numberPeriod+" mode LD";
+                    sendDataToArduino(off);
+                }else{
+                    println("encendido");
+                    messages = "Switch ON in period "+numberPeriod+" mode LD";
+                    sendDataToArduino(firstPeriod.ledColour);
+                }
+                
+        }else{
+          println("apagado0");
+          messages = "Switch OFF in period 0";
+          sendDataToArduino(off);
+        }
+      }
+       
+       if (firstPeriod.isIntervalHours == true){
+         if (firstPeriodDuration < 24 && hour()+minute()/60. >= zt0){
+           numberPeriod +=1;
+           break;
+         }
+         if (day()!= startTime[2] && hour()+minute()/60. >= zt0){
+           repetitions = repetitions-1;
+          // numberPeriod += 1;
+           startTime[2] = day();
+           if (numberPeriod > exp.size()-1){
+             println("Experiment ended");
+             messages = "Experiment Ended";
+             sendDataToArduino(off);
+             alreadyRunning = false;
+             threadArduino.interrupt();
+           }
+           if(repetitions < 1){
+             numberPeriod +=1;
+             break;
+           }  
+         }
+         
+       }else if(firstPeriod.isIntervalHours == false){
+         println("NO Adjustement");
+         numberPeriod +=1;
+          break;
 
+       }
+    delay(60000);  
+    }
     
     //Experiment. While Periods available this while loop is running.
     boolean periodChanged = true;
@@ -128,23 +221,24 @@ public void run(){
          sendDataToArduino(period.ledColour);
        }else if(period.isAlwaysOn != true
                 && period.isAlwaysOff != true
+                && startHour < endHour
                 && endHour <= hour()+minute()/60.){
          println("apagado");
-          messages = "Switch OFF in period "+numberPeriod+"mode LD";
+          messages = "Switch OFF in period "+numberPeriod+" mode LD";
          sendDataToArduino(off);
        }else if(period.isAlwaysOn == true){
          println("encendido");
-         messages = "Switch ON in period "+numberPeriod+"mode LL";
+         messages = "Switch ON in period "+numberPeriod+" mode LL";
          sendDataToArduino(period.ledColour);
        }else if(period.isAlwaysOff == true){
          println("apagado");
-         messages = "Switch OFF in period "+numberPeriod+"mode DD";
+         messages = "Switch OFF in period "+numberPeriod+" mode DD";
          sendDataToArduino(off);
        }else if( startHour > endHour 
                 && endHour <= hour()+minute()/60. 
                 && startHour >= hour()+minute()/60.){
          println("apagado");
-         messages = "Switch OFF in period "+numberPeriod+"mode LD";
+         messages = "Switch OFF in period "+numberPeriod+" mode LD";
          sendDataToArduino(off);
        }else if( startHour > endHour
                 && period.isAlwaysOn != true
@@ -152,12 +246,12 @@ public void run(){
                 if(endHour <= hour()+minute()/60. 
                    && startHour >= hour()+minute()/60.){
                     println("apagado");
-                    messages = "Switch OFF in period "+numberPeriod+"mode LD";
+                    messages = "Switch OFF in period "+numberPeriod+" mode LD";
                     sendDataToArduino(off);
                 }else{
                     println("encendido");
-                    messages = "Switch ON in period "+numberPeriod+"mode LD";
-                    sendDataToArduino(off);
+                    messages = "Switch ON in period "+numberPeriod+" mode LD";
+                    sendDataToArduino(period.ledColour);
                 }
                 
         }       

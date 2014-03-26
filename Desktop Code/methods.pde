@@ -31,13 +31,14 @@ class Experiment {
                          ","+period.switchOffTime[1]+
                          ","+period.isAlwaysOn+
                          ","+period.isAlwaysOff);               
-       //}
      }
      output.flush();
      output.close();
      println("documento salvado");
      
   }
+  
+  
   void open(String file){
     String[] lines = loadStrings(file);
     for (int i = 0; i<lines.length; i++){
@@ -62,24 +63,34 @@ class Experiment {
   void order(){
   }
   
+  //Deletes the selected period
   void delete(int position){
     exp.remove(position);
-    
   }
+  
+  
+  //Updates the GUI.
+  
   void update(){
     String s = "";
      for (int i = 0; i<exp.size(); i++){
        Period period = (Period) exp.get(i);
+       
+       //select hours or minutes for the period.
        char interval= 'h';
        if (period.isIntervalHours == false){
          interval = 'm';
        }
+       
+       //Select mode Light-Dark (default), light-light, or Dark-Dark
        String mode = "LD";
        if (period.isAlwaysOn == true){
          mode = "LL";
        }else if(period.isAlwaysOff == true){
          mode = "DD";
        }
+       
+       //Print the period in the experiment window.
        if (i== 0 && interval == 'm'){
         s = "No Adjustement";
        }else{
@@ -104,6 +115,9 @@ class Experiment {
       
     }
   }
+  
+//Sets the period running in the experiment.
+  
  void set(){  
     int time;
     boolean isIntervalHours;
@@ -112,6 +126,9 @@ class Experiment {
     String sOffTime;  
     boolean isAlwaysOn=false;
     boolean isAlwaysOff=false;
+    
+    
+    //Input data from the GUI
     
     time = int(gui.get(Textfield.class,"durationTextArea").getText());  
     isIntervalHours = boolean(int(gui.get(RadioButton.class,"durationRadioButton").getValue()));  

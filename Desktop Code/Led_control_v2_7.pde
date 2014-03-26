@@ -7,13 +7,13 @@ int maxPeriods = 10;
 //Period[] Periods = new Period[maxPeriods];
 Experiment exp;
 PFont font;
-Serial arduino;
+//Serial arduino;
 String port;
 Boolean alreadyRunning = false;
 String time="";
 String messages="";
 Thread threadArduino;
-
+long delay;
 
 void setup(){
   size(860,490);
@@ -21,9 +21,9 @@ void setup(){
   loadGui();
   font = loadFont("Arial.vlw");
   textFont(font);
-  port = detectArduino();
+  //port = detectArduino();
   println(port);
-  arduino = new Serial(this, port,9600);
+  //arduino = new Serial(this, port,9600);
   exp = new Experiment();
   //printGui();
 }
@@ -35,13 +35,15 @@ void draw(){
       printGui();
   }
   
-
-//  if (alreadyRunning == false || keyPressed || mouseX != pmouseX || mouseY != pmouseY || mousePressed){
-//    printGui();
-//  }
   if (alreadyRunning == true ){
      text(time,410,310);
      text(messages,410,330);
+     if (millis()-delay>1000){
+       text("Running...",410,350);
+       if(millis()-delay>2000){
+       delay=millis();
+       }
+     }
     //exp.run(time);
     //delay(10000);
   }else{
