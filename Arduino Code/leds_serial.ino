@@ -10,20 +10,24 @@ unsigned long frec =0;
 int pW = 0;
 boolean pulses = false;
 boolean newCommand = false;
+volatile int state = LOW;
+char act;
 
 void setup()
-{
+{  
+  state = HIGH;
+  //attachInterrupt(1,trigger, CHANGE);
   // initialize the serial communication:
   Serial.begin(9600);
   // initialize the ledPin as an output:
-
+  pinMode(2,INPUT);
   for (int i=0; i<4;i++){
         pinMode(ledPins[i], OUTPUT);
         analogWrite(ledPins[i],0);
     }
   //Welcome message
   Serial.println("Led controller");
-}
+};
 
 void loop() {
 
@@ -49,7 +53,6 @@ void loop() {
       lights[3] = Serial.parseInt();
 
     }else if (data == 'F'){
-      //Use F to activate pulses, you need for example F/10/100 for 10 ms pulse every 100 ms 
       lights[4] = Serial.parseInt();
       Serial.println(lights[4]);
       frec =lights[4]*1000.;
@@ -58,23 +61,29 @@ void loop() {
       pulses = true;
       
     }else if (data == 'N'){
-      //Use N to stop pulses
       lights[4] = 0;
       lights[5] = 0;
       pulses = false;
+    
+    }else if (data == 'I'){
+      act = Serial.parseInt();
+      Serial.print("I");
       
-    //}else if (byte(data)  == 10 || byte(data)  == 13 || byte(data)  == 32){
-    //  Serial.println("Fin datos");
+      if(act == 0){
+        detachInterrupt(0); 
+        Serial.print("D");
+      }else if (act == 1){
+        attachInterrupt(0,trigger,CHANGE);
+        Serial.print("A");
+      }
+    
     }else if (data == 'C'){
         delay(100);
        Serial.print("Led controller");
-    //}else{
-     // Serial.println(" Error en los datos");
-    //}
     }
-  }   
+  }     
   
-  if(pulses == true){
+  if(pulses == true && state == true){
     time = micros();
     if (time>=t){
       t = time+frec;
@@ -93,10 +102,23 @@ void loop() {
     }
 
   }else if (pulses == false && newCommand == true){
-    for (int i=0; i<4;i++){
-        analogWrite(ledPins[i],lights[i]);
-        newCommand= false;
-    }
-  }
- 
+    if(state == true){
+      for (int i=0; i<4;i++){
+          analogWrite(ledPins[i],lights[i]);
+          newCommand= false;
+      }
+    }else if(state == false){
+      for (int i=0; i<4;i++){
+          digitalWrite(ledPins[i],0);
+          newCommand= false;
+        }
+      } 
+   }
+}
+
+void trigger()
+{
+  state = ! state;
+  //state = false;
+  newCommand= true;
 }
