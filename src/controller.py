@@ -371,7 +371,7 @@ class Controller(Thread):
                         
     
     def closeSerial(self):
-        if self.ser._isOpen:
+        if self.ser.is_open:
             self.writeDataToArduino(False,[0,0,0,0])
             self.ser.__del__()
         f = open('config.cfg','rb')
