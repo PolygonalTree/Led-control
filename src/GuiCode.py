@@ -1,3 +1,22 @@
+"""
+Copyright (C) 2014  Luis Garcia Rodriguez
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+Email: luis.garcia@uni-muenster.de
+
+"""
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'pt_led_controller/GuiCode.ui'
@@ -12,7 +31,7 @@ from PySide import QtCore, QtGui
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(799, 604)
+        MainWindow.resize(800, 600)
         MainWindow.setStyleSheet("#horizontalSlider{\n"
 "     background: red;\n"
 "     margin: 0px 2px 2px 2px;\n"
@@ -204,16 +223,16 @@ class Ui_MainWindow(object):
         self.buttonUpdate.setGeometry(QtCore.QRect(560, 150, 91, 31))
         self.buttonUpdate.setObjectName("buttonUpdate")
         self.doubleSpinBox = QtGui.QDoubleSpinBox(self.centralwidget)
-        self.doubleSpinBox.setGeometry(QtCore.QRect(620, 50, 51, 21))
+        self.doubleSpinBox.setGeometry(QtCore.QRect(620, 50, 61, 21))
         self.doubleSpinBox.setObjectName("doubleSpinBox")
         self.label_13 = QtGui.QLabel(self.centralwidget)
-        self.label_13.setGeometry(QtCore.QRect(680, 50, 41, 21))
+        self.label_13.setGeometry(QtCore.QRect(690, 50, 41, 21))
         self.label_13.setObjectName("label_13")
         self.radioButton_4 = QtGui.QRadioButton(self.centralwidget)
         self.radioButton_4.setGeometry(QtCore.QRect(530, 50, 81, 21))
         self.radioButton_4.setObjectName("radioButton_4")
         self.radioButton_5 = QtGui.QRadioButton(self.centralwidget)
-        self.radioButton_5.setGeometry(QtCore.QRect(530, 80, 61, 16))
+        self.radioButton_5.setGeometry(QtCore.QRect(530, 80, 61, 21))
         self.radioButton_5.setObjectName("radioButton_5")
         self.spinBox_5 = QtGui.QSpinBox(self.centralwidget)
         self.spinBox_5.setGeometry(QtCore.QRect(670, 100, 71, 21))
@@ -306,4 +325,3 @@ class Ui_MainWindow(object):
         self.radioButton_6.setText(QtGui.QApplication.translate("MainWindow", "LM", None, QtGui.QApplication.UnicodeUTF8))
         self.menuPreferences.setTitle(QtGui.QApplication.translate("MainWindow", "A&dd", None, QtGui.QApplication.UnicodeUTF8))
         self.actionAdd_new_incubator.setText(QtGui.QApplication.translate("MainWindow", "&Add new incubator", None, QtGui.QApplication.UnicodeUTF8))
-
