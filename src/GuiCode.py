@@ -320,7 +320,7 @@ class Ui_MainWindow(object):
         self.label_13.setText(QtGui.QApplication.translate("MainWindow", "Hours ", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_4.setText(QtGui.QApplication.translate("MainWindow", "Rampin&g:", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_5.setText(QtGui.QApplication.translate("MainWindow", "P&ulse", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_14.setText(QtGui.QApplication.translate("MainWindow", "Frecuency (ms)", None, QtGui.QApplication.UnicodeUTF8))
+        self.label_14.setText(QtGui.QApplication.translate("MainWindow", "Frequency (ms)", None, QtGui.QApplication.UnicodeUTF8))
         self.label_15.setText(QtGui.QApplication.translate("MainWindow", "Pulse width (ms)", None, QtGui.QApplication.UnicodeUTF8))
         self.radioButton_6.setText(QtGui.QApplication.translate("MainWindow", "LM", None, QtGui.QApplication.UnicodeUTF8))
         self.menuPreferences.setTitle(QtGui.QApplication.translate("MainWindow", "A&dd", None, QtGui.QApplication.UnicodeUTF8))
