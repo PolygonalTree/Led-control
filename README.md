@@ -9,19 +9,14 @@ Although, this program is working, is still a work in progress.
 Any collaboration is wellcome.
 
 Installation:
-It is distributed as a python package. 
-Dowload the zip file, extract it inside some folder on you computer. 
-Install the python package executing "pip install -e ." inside a terminal on the folder where you extract the src folder and setup.py 
-More info in how to install a python package with pip here: http://python-packaging-user-guide.readthedocs.org/en/latest/installing/#use-pip-for-installing
+The LED control is a python package. And it has PySide 1.2.4 as dependency. Due to this dependency it is compatible with python version until 3.4. It is possible to use it with python 3.6 but some tinkering is neccesary.(or the use of a linux distro).
+It can be installed following this steps.
+1. Install PySide. Follow the instructions for your specific operating system: https://pypi.python.org/pypi/PySide/1.2.4
+1. Download the Led-control zip file from Github.
+2. In a terminal or console, navigate to the folder where the zip file is.
+3. use pip install led-control-master.zip
 
-
-TODO
-====
-
--Write a manual.
--Improbe and symplify code.
-
-======
+More info in how to install a python package with pip here: http://python-packaging-user-guide.readthedocs.io/tutorials/installing-packages/#installing-from-local-archives
 
 
 
