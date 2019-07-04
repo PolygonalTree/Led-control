@@ -786,9 +786,9 @@
      <string>Time</string>
     </property>
    </widget>
+   <zorder>frame</zorder>
    <zorder>frame_3</zorder>
    <zorder>frame_2</zorder>
-   <zorder>frame</zorder>
    <zorder>buttonAddPeriod</zorder>
    <zorder>buttonStart</zorder>
    <zorder>buttonSave</zorder>
