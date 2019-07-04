@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'GuiCode.ui',
 # licensing of 'GuiCode.ui' applies.
 #
-# Created: Thu Jul  4 16:35:47 2019
+# Created: Thu Jul  4 16:38:05 2019
 #      by: pyside2-uic  running on PySide2 5.12.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -137,11 +137,6 @@ class Ui_MainWindow(object):
         self.label_15 = QtWidgets.QLabel(self.centralwidget)
         self.label_15.setGeometry(QtCore.QRect(560, 140, 101, 21))
         self.label_15.setObjectName("label_15")
-        self.frame = QtWidgets.QFrame(self.centralwidget)
-        self.frame.setGeometry(QtCore.QRect(520, 80, 221, 81))
-        self.frame.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.frame.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.frame.setObjectName("frame")
         self.frame_2 = QtWidgets.QFrame(self.centralwidget)
         self.frame_2.setGeometry(QtCore.QRect(300, 20, 211, 171))
         self.frame_2.setFrameShape(QtWidgets.QFrame.StyledPanel)
