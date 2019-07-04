@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'GuiCode.ui',
 # licensing of 'GuiCode.ui' applies.
 #
-# Created: Thu Jul  4 10:40:51 2019
+# Created: Thu Jul  4 12:42:08 2019
 #      by: pyside2-uic  running on PySide2 5.12.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -48,7 +48,7 @@ class Ui_MainWindow(object):
         self.buttonAddPeriod.setGeometry(QtCore.QRect(650, 170, 91, 31))
         self.buttonAddPeriod.setObjectName("buttonAddPeriod")
         self.buttonStart = QtWidgets.QPushButton(self.centralwidget)
-        self.buttonStart.setGeometry(QtCore.QRect(700, 550, 111, 31))
+        self.buttonStart.setGeometry(QtCore.QRect(690, 560, 111, 31))
         self.buttonStart.setAutoDefault(False)
         self.buttonStart.setDefault(False)
         self.buttonStart.setFlat(False)
@@ -65,10 +65,10 @@ class Ui_MainWindow(object):
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setColumnCount(9)
         self.tableWidget.setRowCount(0)
-        self.tableWidget.horizontalHeader().setDefaultSectionSize(83)
+        self.tableWidget.horizontalHeader().setDefaultSectionSize(80)
         self.tableWidget.verticalHeader().setVisible(True)
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(10, 450, 801, 71))
+        self.graphicsView.setGeometry(QtCore.QRect(10, 480, 801, 71))
         self.graphicsView.setObjectName("graphicsView")
         self.buttonLoad = QtWidgets.QPushButton(self.centralwidget)
         self.buttonLoad.setGeometry(QtCore.QRect(210, 400, 91, 31))
@@ -93,7 +93,7 @@ class Ui_MainWindow(object):
         self.radioButton_6.setGeometry(QtCore.QRect(160, 30, 41, 21))
         self.radioButton_6.setObjectName("radioButton_6")
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(270, 410, 191, 21))
+        self.label.setGeometry(QtCore.QRect(280, 450, 191, 21))
         self.label.setText("")
         self.label.setObjectName("label")
         self.buttonDel = QtWidgets.QPushButton(self.centralwidget)
@@ -101,10 +101,10 @@ class Ui_MainWindow(object):
         self.buttonDel.setObjectName("buttonDel")
         self.buttonStop = QtWidgets.QPushButton(self.centralwidget)
         self.buttonStop.setEnabled(False)
-        self.buttonStop.setGeometry(QtCore.QRect(580, 550, 111, 31))
+        self.buttonStop.setGeometry(QtCore.QRect(540, 560, 111, 31))
         self.buttonStop.setObjectName("buttonStop")
         self.buttonSim = QtWidgets.QPushButton(self.centralwidget)
-        self.buttonSim.setGeometry(QtCore.QRect(10, 530, 91, 31))
+        self.buttonSim.setGeometry(QtCore.QRect(10, 560, 91, 31))
         self.buttonSim.setObjectName("buttonSim")
         self.buttonUpdate = QtWidgets.QPushButton(self.centralwidget)
         self.buttonUpdate.setGeometry(QtCore.QRect(540, 170, 91, 31))
@@ -155,6 +155,8 @@ class Ui_MainWindow(object):
         self.gridLayout_2.setHorizontalSpacing(0)
         self.gridLayout_2.setObjectName("gridLayout_2")
         self.timeEdit_2 = QtWidgets.QTimeEdit(self.gridLayoutWidget_2)
+        self.timeEdit_2.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.Germany))
+        self.timeEdit_2.setDisplayFormat("HH:mm")
         self.timeEdit_2.setObjectName("timeEdit_2")
         self.gridLayout_2.addWidget(self.timeEdit_2, 3, 1, 1, 1)
         self.dateTimeEdit_2 = QtWidgets.QDateTimeEdit(self.gridLayoutWidget_2)
