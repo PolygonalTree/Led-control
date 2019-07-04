@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Email: luis.garcia@uni-muenster.de
 
 """
-from PySide import QtCore
+from PySide2 import QtCore
 from model import *
 
 from time import sleep
