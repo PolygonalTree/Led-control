@@ -416,7 +416,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 G = 255 if item[2] > 0 else 0
                 B = 255 if item[3] > 0 else 0
                 W = 0 if item[4] > 0 else 255
-                colourPen = QtWidgets.QColor(R,G,B,W)
+                colourPen = QtGui.QColor(R,G,B,W)
                 pen.setColor(colourPen)
                 self.graph.addLine(i,y,i,heigh,pen)
                 self.graph.addLine(i,y,i,y)
@@ -464,7 +464,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 G = 255 if item[2] > 0 else 0
                 B = 255 if item[3] > 0 else 0
                 W = 0 if item[4] > 0 else 255
-                colourPen = QtWidgets.QColor(R,G,B,W)
+                colourPen = QtGui.QColor(R,G,B,W)
                 pen.setColor(colourPen)
                 self.graph.addLine(i,y,i,heigh,pen)
                 self.graph.addLine(i,y,i,y)
@@ -510,11 +510,11 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             actualTime = QtCore.QDateTime.currentDateTime()
             try:
                 self.label.setText("{0}->Period Running = {1}".format(self.incubatorName,period+1))
-                pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+                pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
             except:
                 self.label.setText("Experiment Ended")
-                pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+                pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
 
             i=0
