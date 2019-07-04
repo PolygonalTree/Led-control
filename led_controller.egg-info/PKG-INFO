@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: led-controller
+Version: 2.0.0
+Summary: A simple interface for controlling LEDs in circadian experiments
+Home-page: https://github.com/polygonaltree/Led-control
+Author: Luis Garcia Rodriguez
+Author-email: luis.garcia@uni-muenster.de
+License: GPLv3
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN

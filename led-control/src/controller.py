@@ -17,7 +17,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 Email: luis.garcia@uni-muenster.de
 
 """
-from  PySide import QtCore
+from PySide import QtCore
 from model import *
 
 from time import sleep
@@ -36,6 +36,7 @@ class Controller(Thread):
         self.incubator = incubator
         self.ser = None
         self.previousLightState = None
+        self.isExperimentRunning = None
 
     def run(self):
 
@@ -47,7 +48,7 @@ class Controller(Thread):
             actualDate = time.date()
             timer = QtCore.QElapsedTimer()
             isSerialOpen=self.openSerial(self.incubator)
-            print (isSerialOpen)
+            print(isSerialOpen)
 
             if isSerialOpen:
                 self.mainController()
@@ -58,6 +59,8 @@ class Controller(Thread):
                 timer.start()
                 while self.isExperimentRunning==True:
                     if timer.elapsed() > 60000:
+                        #check serial is open
+                        self.checkArduinoAlive()
                         self.mainController()
                         timer.restart()
                         #sleep to save cpu, if more than 0.2 it becomes aparently
@@ -98,50 +101,82 @@ class Controller(Thread):
                         if (period.dateStartTime.__eq__(actualTime.date())
                             and period.switchOnTime.__gt__(actualTime.time())):
                             self.writeDataToArduino(False, colour)
-                            self.pastLightHistory.append([0,colour[0],
-                                                        colour[1],colour[2],colour[3],rampPercent])
+                            self.pastLightHistory.append([0,
+                                                          colour[0],
+                                                          colour[1],
+                                                          colour[2],
+                                                          colour[3],
+                                                          rampPercent])
                         elif (period.dateStartTime.__eq__(actualTime.date())
                             and endsRamping.__gt__(actualTime.time())):
 
                             colour, rampPercent = self.rampingProccesing(actualTime.time(), isRampingOn, period)
                             self.writeDataToArduino(True, colour)
-                            self.pastLightHistory.append([1,colour[0],
-                                                        colour[1],colour[2],colour[3],rampPercent])
+                            self.pastLightHistory.append([1,
+                                                          colour[0],
+                                                          colour[1],
+                                                          colour[2],
+                                                          colour[3],
+                                                          rampPercent])
                         else:
                             colour, rampPercent = self.rampingProccesing(actualTime.time(), False, period)
                             self.writeDataToArduino(True, colour)
-                            self.pastLightHistory.append([1,colour[0],
-                                                        colour[1],colour[2],colour[3],rampPercent])
+                            self.pastLightHistory.append([1,
+                                                          colour[0],
+                                                          colour[1],
+                                                          colour[2],
+                                                          colour[3],
+                                                          rampPercent])
                 elif period.isDD:
                     if (period.dateStartTime.__eq__(actualTime.date())
-                        and period.switchOnTime.__gt__(actualTime.time())):
+                            and period.switchOnTime.__gt__(actualTime.time())):
                         self.writeDataToArduino(False, colour)
-                        self.pastLightHistory.append([0,colour[0],
-                                                        colour[1],colour[2],colour[3],rampPercent])
+                        self.pastLightHistory.append([0,
+                                                      colour[0],
+                                                      colour[1],
+                                                      colour[2],
+                                                      colour[3],
+                                                      rampPercent])
                     else:
                         self.writeDataToArduino(False, colour)
-                        self.pastLightHistory.append([0,colour[0],
-                                                        colour[1],colour[2],colour[3], rampPercent])
+                        self.pastLightHistory.append([0,
+                                                      colour[0],
+                                                      colour[1],
+                                                      colour[2],
+                                                      colour[3],
+                                                      rampPercent])
                 elif self.isHourInIntervalSim(self.currentPeriod,
-                                            period.switchOnTime,
-                                            period.switchOffTime,
-                                            actualTime):
+                                              period.switchOnTime,
+                                              period.switchOffTime,
+                                              actualTime):
                     colour, rampPercent = self.rampingProccesing(actualTime.time(), isRampingOn, period)
                     self.writeDataToArduino(True, colour)
-                    self.pastLightHistory.append([1,colour[0],
-                                                        colour[1],colour[2],colour[3], rampPercent])
+                    self.pastLightHistory.append([1,
+                                                  colour[0],
+                                                  colour[1],
+                                                  colour[2],
+                                                  colour[3],
+                                                  rampPercent])
                 else:
-                    #LM moon light this need to be checked.
+                    # LM moon light this need to be checked.
                     if period.isLM:
-                        #white soft colour, minimum intensity
+                        # white soft colour, minimum intensity
                         colour = [0,0,0,2]
                         self.writeDataToArduino(True, colour)
-                        self.pastLightHistory.append([0,colour[0],
-                                                    colour[1],colour[2],colour[3],rampPercent])
+                        self.pastLightHistory.append([0,
+                                                      colour[0],
+                                                      colour[1],
+                                                      colour[2],
+                                                      colour[3],
+                                                      rampPercent])
                     else:
                         self.writeDataToArduino(False,colour)
-                        self.pastLightHistory.append([0,colour[0],
-                                                        colour[1],colour[2],colour[3], rampPercent])
+                        self.pastLightHistory.append([0,
+                                                      colour[0],
+                                                      colour[1],
+                                                      colour[2],
+                                                      colour[3],
+                                                      rampPercent])
         except Exception as e:
             print (e)
             self.closeSerial()
@@ -168,12 +203,12 @@ class Controller(Thread):
             if period.switchOffTime.__le__(period.switchOnTime):
                 #logich inverted
                 if (period.dateStartTime.__le__(currentDate)
-                    and period.dateEndTime.__ge__(currentDate)):
-                    if (last == False
-                        and period.dateEndTime.__eq__(nextPeriod.dateStartTime)
-                        and period.dateEndTime.__eq__(actualTime.date())
-                        and nextPeriod.switchOnTime.__le__(actualTime.time())):
-                        if last == True:
+                        and period.dateEndTime.__ge__(currentDate)):
+                    if (not last
+                            and period.dateEndTime.__eq__(nextPeriod.dateStartTime)
+                            and period.dateEndTime.__eq__(actualTime.date())
+                            and nextPeriod.switchOnTime.__le__(actualTime.time())):
+                        if last:
                             currentPeriod = None
                         else:
                             currentPeriod =  self.experiment.index(period)+1
@@ -184,12 +219,12 @@ class Controller(Thread):
             else:
                 #normal logic
                 if (period.dateStartTime.__le__(currentDate)
-                    and period.dateEndTime.__ge__(currentDate)):
-                    if (last == False
-                        and period.dateEndTime.__eq__(nextPeriod.dateStartTime)
-                        and period.dateEndTime.__eq__(actualTime.date())
-                        and nextPeriod.switchOnTime.__le__(actualTime.time())):
-                        if last == True:
+                        and period.dateEndTime.__ge__(currentDate)):
+                    if (not last
+                            and period.dateEndTime.__eq__(nextPeriod.dateStartTime)
+                            and period.dateEndTime.__eq__(actualTime.date())
+                            and nextPeriod.switchOnTime.__le__(actualTime.time())):
+                        if last:
                             currentPeriod = None
                         else:
                             currentPeriod = self.experiment.index(period)+1
@@ -288,35 +323,63 @@ class Controller(Thread):
                     endsRamping = period.switchOnTime.addSecs(period.rampingTime*3600)
                     if (period.dateStartTime.__eq__(futureTime.date())
                         and period.switchOnTime.__gt__(futureTime.time())):
-                        self.futureLightHistory.append([0,colour[0],
-                                                    colour[1],colour[2],colour[3],rampPercent])
+                        self.futureLightHistory.append([0,
+                                                        colour[0],
+                                                        colour[1],
+                                                        colour[2],
+                                                        colour[3],
+                                                        rampPercent])
                     elif (period.dateStartTime.__eq__(futureTime.date())
                         and endsRamping.__gt__(futureTime.time())):
                         colour, rampPercent = self.rampingProccesing(futureTime.time(), isRampingOn, period)
-                        self.futureLightHistory.append([1,colour[0],
-                                                    colour[1],colour[2],colour[3],rampPercent])
+                        self.futureLightHistory.append([1,
+                                                        colour[0],
+                                                        colour[1],
+                                                        colour[2],
+                                                        colour[3],
+                                                        rampPercent])
                     else:
                         colour, rampPercent = self.rampingProccesing(futureTime.time(), False, period)
-                        self.futureLightHistory.append([1,colour[0],
-                                                    colour[1],colour[2],colour[3],rampPercent])
+                        self.futureLightHistory.append([1,
+                                                        colour[0],
+                                                        colour[1],
+                                                        colour[2],
+                                                        colour[3],
+                                                        rampPercent])
                 elif self.experiment[futurePeriod].isDD:
                     if (period.dateStartTime.__eq__(futureTime.date())
-                        and period.switchOnTime.__gt__(futureTime.time())):
-                        self.futureLightHistory.append([0,colour[0],
-                                                    colour[1],colour[2],colour[3],rampPercent])
+                            and period.switchOnTime.__gt__(futureTime.time())):
+                        self.futureLightHistory.append([0,
+                                                        colour[0],
+                                                        colour[1],
+                                                        colour[2],
+                                                        colour[3],
+                                                        rampPercent])
                     else:
-                        self.futureLightHistory.append([0,colour[0],
-                                                    colour[1],colour[2],colour[3], rampPercent])
+                        self.futureLightHistory.append([0,
+                                                        colour[0],
+                                                        colour[1],
+                                                        colour[2],
+                                                        colour[3],
+                                                        rampPercent])
                 elif self.isHourInIntervalSim(futurePeriod,
                                               period.switchOnTime,
                                               period.switchOffTime,
                                               futureTime):
                     colour, rampPercent = self.rampingProccesing(futureTime.time(), isRampingOn, period)
-                    self.futureLightHistory.append([1,colour[0],
-                                                    colour[1],colour[2],colour[3], rampPercent])
+                    self.futureLightHistory.append([1,
+                                                    colour[0],
+                                                    colour[1],
+                                                    colour[2],
+                                                    colour[3],
+                                                    rampPercent])
                 else:
-                    self.futureLightHistory.append([0,colour[0],
-                                                    colour[1],colour[2],colour[3], rampPercent])
+                    self.futureLightHistory.append([0,
+                                                    colour[0],
+                                                    colour[1],
+                                                    colour[2],
+                                                    colour[3],
+                                                    rampPercent])
 
             futureTime = futureTime.addMSecs(60000) #add 1min
 
@@ -356,9 +419,18 @@ class Controller(Thread):
                     else:
                         print("error, Not a Led controller")
                         self.ser.__del__()
-                        self.isExperimentRunning=False
+                        self.isExperimentRunning = False
                         return False
 
+    def checkArduinoAlive(self):
+        if self.ser.is_open:
+            self.ser.write(b'C\r')
+            sleep(1)
+            res = self.ser.readline()
+            if not res.find(b'Led controller') >= 0:
+                self.openSerial(self.incubator)
+        else:
+            self.openSerial(self.incubator)
 
     def closeSerial(self):
         if self.ser.is_open:

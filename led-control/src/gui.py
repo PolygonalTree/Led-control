@@ -19,7 +19,7 @@
 	Email: luis.garcia@uni-muenster.de
 
 """
-from PySide import QtCore, QtGui, QtSql
+from PySide2 import QtCore, QtGui, QtSql
 from GuiCode import Ui_MainWindow
 from controller import *
 from model import *
@@ -30,7 +30,7 @@ import sys, threading, os
 from time import sleep
 
 
-class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
+class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
         """
         initialize the class for the main window.
@@ -51,7 +51,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.buttonSim.clicked.connect(self.simulation)
         self.tableWidget.itemSelectionChanged.connect(self.selectPeriod)
         self.tableWidget.setColumnWidth(0,120)
-        self.graph = QtGui.QGraphicsScene()
+        self.graph = QtWidgets.QGraphicsScene()
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.updateDrawCurrentPeriod)
         self.graphicsView.setAlignment(QtCore.Qt.AlignLeft)
@@ -79,7 +79,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             addD.addDialog.label_3.setText(snr)
 
         r = addD.exec_()
-        if r == QtGui.QDialog.Accepted:
+        if r == QtWidgets.QDialog.Accepted:
             try:
                 f = open('config.cfg', 'rb')
                 old_list = pickle.load(f)
@@ -144,48 +144,48 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
 
         i=0
         for period in self.exp.experiment:
-            itemLight = QtGui.QTableWidgetItem("R:{0}/G:{1}/B:{2}/W:{3}".format(period.lightColour[0],
+            itemLight = QtWidgets.QTableWidgetItem("R:{0}/G:{1}/B:{2}/W:{3}".format(period.lightColour[0],
                                                                                 period.lightColour[1],
                                                                                 period.lightColour[2],
                                                                                 period.lightColour[3]))
             itemLight.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,0,itemLight)
 
-            itemStartDay = QtGui.QTableWidgetItem("{0}/{1}/{2}".format(period.dateStartTime.day(),
+            itemStartDay = QtWidgets.QTableWidgetItem("{0}/{1}/{2}".format(period.dateStartTime.day(),
                                                                        period.dateStartTime.month(),
                                                                        period.dateStartTime.year()))
             itemStartDay.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,1,itemStartDay)
 
-            itemEndDay = QtGui.QTableWidgetItem("{0}/{1}/{2}".format(period.dateEndTime.day(),
+            itemEndDay = QtWidgets.QTableWidgetItem("{0}/{1}/{2}".format(period.dateEndTime.day(),
                                                                        period.dateEndTime.month(),
                                                                        period.dateEndTime.year()))
             itemEndDay.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,2,itemEndDay)
 
-            itemSOn = QtGui.QTableWidgetItem("{0:0=2d}:{1:0=2d}".format(period.switchOnTime.hour(),
+            itemSOn = QtWidgets.QTableWidgetItem("{0:0=2d}:{1:0=2d}".format(period.switchOnTime.hour(),
                                                                         period.switchOnTime.minute()))
             itemSOn.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,3,itemSOn)
 
-            itemSOff = QtGui.QTableWidgetItem("{0:0=2d}:{1:0=2d}".format(period.switchOffTime.hour(),
+            itemSOff = QtWidgets.QTableWidgetItem("{0:0=2d}:{1:0=2d}".format(period.switchOffTime.hour(),
                                                                          period.switchOffTime.minute()))
             itemSOff.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,4,itemSOff)
 
-            itemLL = QtGui.QTableWidgetItem("{0}".format("yes" if period.isLL  else "no"))
+            itemLL = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isLL  else "no"))
             itemLL.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,5,itemLL)
 
-            itemDD = QtGui.QTableWidgetItem("{0}".format("yes" if period.isDD  else "no"))
+            itemDD = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isDD  else "no"))
             itemDD.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,6,itemDD)
 
-            itemRamp = QtGui.QTableWidgetItem("{0}".format("yes" if period.isRampingOn else "no"))
+            itemRamp = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isRampingOn else "no"))
             itemRamp.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,7,itemRamp)
 
-            itemPulse = QtGui.QTableWidgetItem("{0}".format("yes" if period.isPulseOn else "no"))
+            itemPulse = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isPulseOn else "no"))
             itemPulse.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,8,itemPulse)
 
@@ -287,7 +287,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         directory = "./experiments_saved"
         if not os.path.exists(directory):
             os.makedirs(directory)
-        fileName = QtGui.QFileDialog.getSaveFileName(self,
+        fileName = QtWidgets.QFileDialog.getSaveFileName(self,
                                                     "Save Experiment",
                                                     directory,
                                                     filter ="Experiment Files (*.exp *.);;All Files (*)")
@@ -306,7 +306,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         Load experiment saved in pickle file.
         """
         directory = "./experiments_saved"
-        fileName = QtGui.QFileDialog.getOpenFileName(self,
+        fileName = QtWidgets.QFileDialog.getOpenFileName(self,
     "Open Experiment", directory, "Experiment Files (*.exp);;All Files(*)")
         try:
             f = open(fileName[0], 'rb')
@@ -336,7 +336,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                                         add a new one or stop some experiment""")
         r=d.exec_()
 
-        if r==QtGui.QDialog.Accepted:
+        if r==QtWidgets.QDialog.Accepted:
             #takes the selected incubator
             incubatorName = d.dialog.listWidget.currentItem()
             for incubator in incubators:
@@ -400,10 +400,10 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
         self.graph.clear()
         try:
             self.label.setText("{0}->Period Running = {1}".format(self.incubatorName,period+1))
-            pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+            pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
         except:
             self.label.setText("Experiment Ended")
-            pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+            pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
         i=0
         heigh = 20
         for item in pastLightHistory:
@@ -416,7 +416,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 G = 255 if item[2] > 0 else 0
                 B = 255 if item[3] > 0 else 0
                 W = 0 if item[4] > 0 else 255
-                colourPen = QtGui.QColor(R,G,B,W)
+                colourPen = QtWidgets.QColor(R,G,B,W)
                 pen.setColor(colourPen)
                 self.graph.addLine(i,y,i,heigh,pen)
                 self.graph.addLine(i,y,i,y)
@@ -464,7 +464,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                 G = 255 if item[2] > 0 else 0
                 B = 255 if item[3] > 0 else 0
                 W = 0 if item[4] > 0 else 255
-                colourPen = QtGui.QColor(R,G,B,W)
+                colourPen = QtWidgets.QColor(R,G,B,W)
                 pen.setColor(colourPen)
                 self.graph.addLine(i,y,i,heigh,pen)
                 self.graph.addLine(i,y,i,y)
@@ -510,11 +510,11 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             actualTime = QtCore.QDateTime.currentDateTime()
             try:
                 self.label.setText("{0}->Period Running = {1}".format(self.incubatorName,period+1))
-                pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+                pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
             except:
                 self.label.setText("Experiment Ended")
-                pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+                pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
 
             i=0
@@ -578,7 +578,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             f.close
 
             self.graph.clear()
-            pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
+            pen = QtWidgets.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
             self.label.setText("Simulation")
 
             i = 0
@@ -593,7 +593,7 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
                     G = 255 if item[2] > 0 else 0
                     B = 255 if item[3] > 0 else 0
                     W = 0 if item[4] > 0 else 255
-                    colourPen = QtGui.QColor(R,G,B,W)
+                    colourPen = QtWidgets.QColor(R,G,B,W)
                     pen.setColor(colourPen)
                     self.graph.addLine(i,y,i,heigh,pen)
                     self.graph.addLine(i,y,i,y)
@@ -639,20 +639,20 @@ class ControlMainWindow(QtGui.QMainWindow, Ui_MainWindow):
             self.label.setText("No Periods, please add one.")
 
 
-class DialogSelectIncubator(QtGui.QDialog):
+class DialogSelectIncubator(QtWidgets.QDialog):
      def __init__(self,parent=None):
         super(DialogSelectIncubator, self).__init__(parent)
         self.dialog = Ui_Dialog()
         self.dialog.setupUi(self)
 
-class DialogAddIncubator(QtGui.QDialog):
+class DialogAddIncubator(QtWidgets.QDialog):
      def __init__(self,parent=None):
         super(DialogAddIncubator, self).__init__(parent)
         self.addDialog = Ui_AddDialog()
         self.addDialog.setupUi(self)
 
 def main():
-    app = QtGui.QApplication(sys.argv)
+    app = QtWidgets.QApplication(sys.argv)
     LedController = ControlMainWindow()
     LedController.show()
     app.aboutToQuit.connect(LedController.stopExperiment)

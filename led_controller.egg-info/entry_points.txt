@@ -1,0 +1,3 @@
+[console_scripts]
+led-controller = gui:main
+

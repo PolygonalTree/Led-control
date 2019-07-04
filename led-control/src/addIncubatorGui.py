@@ -1,60 +1,42 @@
-"""
-Copyright (C) 2014  Luis Garcia Rodriguez
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
-
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-Email: luis.garcia@uni-muenster.de
-
-"""
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'add.ui'
+# Form implementation generated from reading ui file 'add.ui',
+# licensing of 'add.ui' applies.
 #
-# Created: Tue Aug 19 12:48:34 2014
-#      by: pyside-uic 0.2.15 running on PySide 1.2.1
+# Created: Thu Jul  4 10:48:00 2019
+#      by: pyside2-uic  running on PySide2 5.12.4
 #
 # WARNING! All changes made in this file will be lost!
 
-from PySide import QtCore, QtGui
+from PySide2 import QtCore, QtGui, QtWidgets
 
 class Ui_AddDialog(object):
     def setupUi(self, AddDialog):
         AddDialog.setObjectName("AddDialog")
         AddDialog.resize(371, 185)
-        self.buttonBox = QtGui.QDialogButtonBox(AddDialog)
+        self.buttonBox = QtWidgets.QDialogButtonBox(AddDialog)
         self.buttonBox.setGeometry(QtCore.QRect(20, 140, 341, 32))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
-        self.buttonBox.setStandardButtons(QtGui.QDialogButtonBox.Cancel|QtGui.QDialogButtonBox.Ok)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
-        self.label = QtGui.QLabel(AddDialog)
+        self.label = QtWidgets.QLabel(AddDialog)
         self.label.setGeometry(QtCore.QRect(30, 80, 81, 31))
         font = QtGui.QFont()
         font.setWeight(75)
         font.setBold(True)
         self.label.setFont(font)
         self.label.setObjectName("label")
-        self.label_2 = QtGui.QLabel(AddDialog)
+        self.label_2 = QtWidgets.QLabel(AddDialog)
         self.label_2.setGeometry(QtCore.QRect(10, 30, 101, 41))
         font = QtGui.QFont()
         font.setWeight(75)
         font.setBold(True)
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
-        self.label_3 = QtGui.QLabel(AddDialog)
+        self.label_3 = QtWidgets.QLabel(AddDialog)
         self.label_3.setGeometry(QtCore.QRect(120, 30, 221, 41))
         self.label_3.setObjectName("label_3")
-        self.lineEdit = QtGui.QLineEdit(AddDialog)
+        self.lineEdit = QtWidgets.QLineEdit(AddDialog)
         self.lineEdit.setGeometry(QtCore.QRect(120, 80, 211, 31))
         self.lineEdit.setObjectName("lineEdit")
 
@@ -64,7 +46,8 @@ class Ui_AddDialog(object):
         QtCore.QMetaObject.connectSlotsByName(AddDialog)
 
     def retranslateUi(self, AddDialog):
-        AddDialog.setWindowTitle(QtGui.QApplication.translate("AddDialog", "Dialog", None, QtGui.QApplication.UnicodeUTF8))
-        self.label.setText(QtGui.QApplication.translate("AddDialog", "Add a name:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_2.setText(QtGui.QApplication.translate("AddDialog", "Device detected:", None, QtGui.QApplication.UnicodeUTF8))
-        self.label_3.setText(QtGui.QApplication.translate("AddDialog", "None", None, QtGui.QApplication.UnicodeUTF8))
+        AddDialog.setWindowTitle(QtWidgets.QApplication.translate("AddDialog", "Dialog", None, -1))
+        self.label.setText(QtWidgets.QApplication.translate("AddDialog", "Add a name:", None, -1))
+        self.label_2.setText(QtWidgets.QApplication.translate("AddDialog", "Device detected:", None, -1))
+        self.label_3.setText(QtWidgets.QApplication.translate("AddDialog", "None", None, -1))
+
