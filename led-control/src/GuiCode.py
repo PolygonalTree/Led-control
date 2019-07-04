@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'GuiCode.ui',
 # licensing of 'GuiCode.ui' applies.
 #
-# Created: Thu Jul  4 12:42:08 2019
+# Created: Thu Jul  4 12:53:16 2019
 #      by: pyside2-uic  running on PySide2 5.12.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -174,6 +174,7 @@ class Ui_MainWindow(object):
         self.label_7.setObjectName("label_7")
         self.gridLayout_2.addWidget(self.label_7, 3, 0, 1, 1)
         self.timeEdit = QtWidgets.QTimeEdit(self.gridLayoutWidget_2)
+        self.timeEdit.setDisplayFormat("HH:mm")
         self.timeEdit.setObjectName("timeEdit")
         self.gridLayout_2.addWidget(self.timeEdit, 2, 1, 1, 1)
         self.label_9 = QtWidgets.QLabel(self.gridLayoutWidget_2)
