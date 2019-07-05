@@ -801,7 +801,7 @@
      <x>0</x>
      <y>0</y>
      <width>822</width>
-     <height>21</height>
+     <height>20</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuPreferences">
@@ -810,12 +810,24 @@
     </property>
     <addaction name="actionAdd_new_incubator"/>
    </widget>
+   <widget class="QMenu" name="menuUnlock">
+    <property name="title">
+     <string>Unlock</string>
+    </property>
+    <addaction name="actionunlock_controller"/>
+   </widget>
    <addaction name="menuPreferences"/>
+   <addaction name="menuUnlock"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <action name="actionAdd_new_incubator">
    <property name="text">
     <string>&amp;Add new incubator</string>
+   </property>
+  </action>
+  <action name="actionunlock_controller">
+   <property name="text">
+    <string>unlock_controller</string>
    </property>
   </action>
  </widget>

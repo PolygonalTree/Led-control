@@ -26,6 +26,8 @@ import serial
 import serial.tools.list_ports
 import pickle
 
+
+
 class Controller(Thread):
 
     def __init__(self, exp=[], incubator=None):
@@ -389,12 +391,7 @@ class Controller(Thread):
     def openSerial(self, incubator):
         SNR = 0
         for port in serial.tools.list_ports.comports():
-            if port[2].find('SNR=')>0:
-                SNR = port[2][port[2].find('SNR=')+4:]
-            elif port[2].find('PID'):
-                SNR = port[2][port[2].find('PID'):]
-            else:
-                SNR = None
+            SNR = self.getSNR(port)
 
             if SNR != None:
                 if incubator['SN'] == SNR:
@@ -469,49 +466,44 @@ class Controller(Thread):
         """
         return list(serialPorts())
 
-    def detectIncubators(self):
-        #load saved incubators
+    def detectIncubators(self, isRunning = False):
+        # load saved incubators
         f = open('config.cfg', 'rb')
         incubatorDisplayList = []
         incubatorList = pickle.load(f)
         for port in serial.tools.list_ports.comports():
-            if port[2].find('SNR=')>=0:
-                SNR = port[2][port[2].find('SNR=')+4:]
-            elif port[2].find('PID')>=0:
-                SNR = port[2][port[2].find('PID'):]
-            else:
-                SNR = None
-
+            print('Port',port[2])
+            SNR = self.getSNR(port)
             if SNR != None:
                 for incubator in incubatorList:
-                    if incubator['SN'] == SNR and incubator['isRunning']==False:
+                    if incubator['SN'] == SNR and incubator['isRunning'] == isRunning:
                         incubatorDisplayList.append(incubator)
 
         return incubatorDisplayList
 
+    def getSNR(self, port):
+        if port[2].find('SNR=') >= 0:
+            SNR = port[2][port[2].find('SNR=') + 4:].split(" ")[0]
+        elif port[2].find('SER=') >= 0:
+            SNR = port[2][port[2].find('SER=') + 4:].split(" ")[0]
+        elif port[2].find('PID') >= 0:
+            SNR = port[2][port[2].find('PID=') + 4:].split(" ")[0]
+        else:
+            SNR = None
+        return SNR
+
     def addIncubator(self):
         newIncubator = None
-
         try:
             f = open('config.cfg', 'rb')
             incubatorList = pickle.load(f)
-
         except:
             f = open('config.cfg', 'wb')
             incubatorList = []
             pass
 
         for port in serial.tools.list_ports.comports():
-            print(port[2])
-            if port[2].find('SNR=')>=0:
-                SNR = port[2][port[2].find('SNR=')+4:]
-                print(SNR)
-            elif port[2].find('PID')>=0:
-                SNR = port[2][port[2].find('PID'):]
-                print(SNR)
-            else:
-                SNR = None
-
+            SNR = self.getSNR(port)
             if SNR != None:
                 new = True
                 try:
@@ -544,6 +536,22 @@ class Controller(Thread):
 
         return newIncubator
 
+
+    def unlockIncubator(self, incubator):
+        try:
+            with open('config.cfg', 'rb') as f:
+                incubatorList = pickle.load(f)
+        except:
+            incubatorList = []
+            print("Open config file failed")
+            pass
+
+        for inc in incubatorList:
+            if incubator["SN"] == inc["SN"]:
+                inc["isRunning"] = False
+                with open('config.cfg','wb') as f:
+                    pickle.dump(incubatorList, f, pickle.HIGHEST_PROTOCOL)
+        return True
 
 
     def writeDataToArduino(self, on, colour):

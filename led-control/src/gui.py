@@ -25,10 +25,16 @@ from controller import *
 from model import *
 from addIncubatorGui import *
 from selectIncubatorGui import *
+from unlock import *
 import pickle
 import sys, threading, os
 from time import sleep
 
+if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+
+if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+    QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
 
 class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -56,6 +62,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.timer.timeout.connect(self.updateDrawCurrentPeriod)
         self.graphicsView.setAlignment(QtCore.Qt.AlignLeft)
         self.actionAdd_new_incubator.triggered.connect(self.addIncubator)
+        self.actionunlock_controller.triggered.connect(self.unlockIncubator)
         self.periodUpdated = False
         self.exp = None
         self.selectedPeriod = None
@@ -67,16 +74,15 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def addIncubator(self):
         """
         Dialog to add incubator.
-        It calls addIncuatot in module control to look up for new connected incubators.
+        It calls addIncubator in module control to look up for new connected incubators.
         If new incubator returned by control.Addincubator then is ask for the name of it.
         New incubator metadata is saved in configuration file.
         """
         addD = DialogAddIncubator(self)
         control = Controller()
         snr = control.addIncubator()
-        if snr == None:
-            addD.addDialog.label_3.setText("""There is no new inubator detected,
-            please check the cable.""")
+        if snr is None:
+            addD.addDialog.label_3.setText("""There are no new incubator detected,\n please check the cable.""")
             addD.addDialog.lineEdit.setDisabled(True)
         else:
             addD.addDialog.label_3.setText(snr)
@@ -99,7 +105,35 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pickle.dump(old_list, f, pickle.HIGHEST_PROTOCOL)
                 f.close()
 
+    @QtCore.Slot()
+    def unlockIncubator(self):
+        """
+        Dialog to unlock incubator.
+        It scans the config file in search for locked incubators and shows a list of locked ones.
+        User selects one and by clicking ok the controller is released.
+        """
+        unlockD = DialogUnlockIncubator(self)
+        control = Controller()
+        # retrieve incubators running
+        incubators = control.detectIncubators(isRunning=True)
 
+        for incubator in incubators:
+            unlockD.unlockDialog.listWidget.addItem(str(incubator['name']))
+
+        if len(incubators) == 0:
+            unlockD.unlockDialog.listWidget.addItem("""There are no incubators locked. """)
+        r = unlockD.exec_()
+
+        if r == QtWidgets.QDialog.Accepted:
+            # takes the selected incubator
+            incubatorName = unlockD.unlockDialog.listWidget.currentItem()
+            for incubator in incubators:
+                if str(incubatorName.text()) == str(incubator['name']):
+                    control.unlockIncubator(incubator)
+        else:
+            # user cancelled the start of experiment
+            # TODO add a more elegant way to do this.
+            pass
 
     @QtCore.Slot()
     def addPeriod(self):
@@ -643,16 +677,25 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 class DialogSelectIncubator(QtWidgets.QDialog):
-     def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(DialogSelectIncubator, self).__init__(parent)
         self.dialog = Ui_Dialog()
         self.dialog.setupUi(self)
 
+
 class DialogAddIncubator(QtWidgets.QDialog):
-     def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(DialogAddIncubator, self).__init__(parent)
         self.addDialog = Ui_AddDialog()
         self.addDialog.setupUi(self)
+
+
+class DialogUnlockIncubator(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(DialogUnlockIncubator, self).__init__(parent)
+        self.unlockDialog = Ui_UnlockDialog()
+        self.unlockDialog.setupUi(self)
+
 
 def main():
     app = QtWidgets.QApplication(sys.argv)

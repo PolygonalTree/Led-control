@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'GuiCode.ui',
 # licensing of 'GuiCode.ui' applies.
 #
-# Created: Fri Jul  5 12:23:06 2019
+# Created: Fri Jul  5 15:47:34 2019
 #      by: pyside2-uic  running on PySide2 5.12.4
 #
 # WARNING! All changes made in this file will be lost!
@@ -280,18 +280,24 @@ class Ui_MainWindow(object):
         self.label_17.setObjectName("label_17")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 822, 21))
+        self.menubar.setGeometry(QtCore.QRect(0, 0, 822, 20))
         self.menubar.setObjectName("menubar")
         self.menuPreferences = QtWidgets.QMenu(self.menubar)
         self.menuPreferences.setObjectName("menuPreferences")
+        self.menuUnlock = QtWidgets.QMenu(self.menubar)
+        self.menuUnlock.setObjectName("menuUnlock")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
         self.actionAdd_new_incubator = QtWidgets.QAction(MainWindow)
         self.actionAdd_new_incubator.setObjectName("actionAdd_new_incubator")
+        self.actionunlock_controller = QtWidgets.QAction(MainWindow)
+        self.actionunlock_controller.setObjectName("actionunlock_controller")
         self.menuPreferences.addAction(self.actionAdd_new_incubator)
+        self.menuUnlock.addAction(self.actionunlock_controller)
         self.menubar.addAction(self.menuPreferences.menuAction())
+        self.menubar.addAction(self.menuUnlock.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QObject.connect(self.horizontalSlider, QtCore.SIGNAL("valueChanged(int)"), self.spinBox.setValue)
@@ -352,5 +358,7 @@ class Ui_MainWindow(object):
         self.label_16.setText(QtWidgets.QApplication.translate("MainWindow", "Lights", None, -1))
         self.label_17.setText(QtWidgets.QApplication.translate("MainWindow", "Time", None, -1))
         self.menuPreferences.setTitle(QtWidgets.QApplication.translate("MainWindow", "A&dd", None, -1))
+        self.menuUnlock.setTitle(QtWidgets.QApplication.translate("MainWindow", "Unlock", None, -1))
         self.actionAdd_new_incubator.setText(QtWidgets.QApplication.translate("MainWindow", "&Add new incubator", None, -1))
+        self.actionunlock_controller.setText(QtWidgets.QApplication.translate("MainWindow", "unlock_controller", None, -1))
 
