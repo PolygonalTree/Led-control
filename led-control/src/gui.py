@@ -107,9 +107,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Dialog to add period.
         Takes parameters from the view and loads it into a period object.
         """
-        try:
-            self.exp
-        except:
+        if self.exp is None:
             self.exp = Experiment()
 
         period = Period()
