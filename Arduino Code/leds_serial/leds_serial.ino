@@ -6,7 +6,7 @@ int BrightnessValue = 0;
 int lights[] = {0,0,0,0,0,0};
 unsigned long t = 0;
 unsigned long time = 0;
-unsigned long frec =0;
+unsigned long frec = 0;
 int pW = 0;
 boolean pulses = false;
 boolean newCommand = false;
@@ -93,9 +93,13 @@ void loop() {
       analogWrite(9,lights[2]);
       analogWrite(10,lights[3]);
       delay(lights[5]);
+      analogWrite(5,0);
+      analogWrite(6,0);
+      analogWrite(9,0);
+      analogWrite(10,0);
       //c code to switch off
-      PORTB = B00000000;
-      PORTD = B00000000;
+      //PORTB = B00000000;
+      //PORTD = B00000000;
       //Serial.println(micros());
     newCommand= false;
     

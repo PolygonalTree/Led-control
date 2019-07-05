@@ -57,7 +57,10 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.graphicsView.setAlignment(QtCore.Qt.AlignLeft)
         self.actionAdd_new_incubator.triggered.connect(self.addIncubator)
         self.periodUpdated = False
-
+        self.exp = None
+        self.selectedPeriod = None
+        self.control = None
+        self.incubatorName = None
 
 
     @QtCore.Slot()
@@ -242,7 +245,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def deletePeriods(self):
         """
         Delete selected periods from the experiment table
-	"""
+        """
         periodsToDelete=[]
         for idx in self.tableWidget.selectedIndexes():
             periodsToDelete.append(idx.row())
@@ -307,7 +310,9 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """
         directory = "./experiments_saved"
         fileName = QtWidgets.QFileDialog.getOpenFileName(self,
-    "Open Experiment", directory, "Experiment Files (*.exp);;All Files(*)")
+                                                         "Open Experiment",
+                                                         directory,
+                                                         "Experiment Files (*.exp);;All Files(*)")
         try:
             f = open(fileName[0], 'rb')
             self.exp = pickle.load(f)
@@ -334,23 +339,23 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if len(incubators)==0:
             d.dialog.listWidget.addItem("""There is no incubators available,
                                         add a new one or stop some experiment""")
-        r=d.exec_()
+        r = d.exec_()
 
-        if r==QtWidgets.QDialog.Accepted:
-            #takes the selected incubator
+        if r == QtWidgets.QDialog.Accepted:
+            # takes the selected incubator
             incubatorName = d.dialog.listWidget.currentItem()
             for incubator in incubators:
                 if str(incubatorName.text()) == str(incubator['name']):
                     self.control = Controller(self.exp.experiment, incubator)
                     self.control.start()
                     print("starting...")
-                    i=0
+                    i = 0
                     while not self.control.getIsExperimentRunning():
-                        #wait for the experiment to start.
+                        # wait for the experiment to start.
                         sleep(0.5)
-                        #TODO add some sort of maximum waiting time.
+                        # TODO add some sort of maximum waiting time.
                     print("started")
-                    if self.control.getIsExperimentRunning() == True:
+                    if self.control.getIsExperimentRunning():
                         self.incubatorName = incubatorName.text()
                         self.buttonStart.setEnabled(False)
                         self.buttonSim.setEnabled(False)
@@ -363,8 +368,8 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
         else:
-            #user cancelled the start experiment
-            #TODO add a more elegant way to do this.
+            # user cancelled the start of experiment
+            # TODO add a more elegant way to do this.
             pass
 
     @QtCore.Slot()
@@ -382,8 +387,8 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.buttonStop.setEnabled(False)
                 self.timer.stop()
         else:
-            #added to prevent blockage when something happened.
-            #TODO Improve this and detect why that can happen.
+            # added to prevent blockage when something happened.
+            # TODO Improve this and detect why that can happen.
             try:
                 self.buttonStart.setEnabled(True)
                 self.buttonSim.setEnabled(True)

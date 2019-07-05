@@ -37,6 +37,7 @@ class Controller(Thread):
         self.ser = None
         self.previousLightState = None
         self.isExperimentRunning = None
+        self.currentPeriod = None
 
     def run(self):
 
@@ -52,23 +53,23 @@ class Controller(Thread):
 
             if isSerialOpen:
                 self.mainController()
-                ##timer to only call the function every minute.
+                # timer to only call the function every minute.
                 self.simulateExperiment(time)
                 self.isExperimentRunning = True
                 self.previousLightState = None
                 timer.start()
-                while self.isExperimentRunning==True:
+                while self.isExperimentRunning:
                     if timer.elapsed() > 60000:
-                        #check serial is open
+                        # check serial is open
                         self.checkArduinoAlive()
                         self.mainController()
                         timer.restart()
-                        #sleep to save cpu, if more than 0.2 it becomes aparently
-                        #unresponsive for the user.
+                        # sleep to save cpu, if more than 0.2 it becomes apparently
+                        # unresponsive for the user.
                     sleep(0.2)
 
                 self.closeSerial()
-                print ("serial closed")
+                print("serial closed")
             else:
                 self.isExperimentRunning = False
 
@@ -80,7 +81,7 @@ class Controller(Thread):
 
 
     def mainController(self):
-        ##Get the actual period
+        # Get the actual period
         actualTime = QtCore.QDateTime.currentDateTime()
         currentDate = actualTime.date()
         self.currentPeriod = self.periodActive(actualTime)
@@ -262,7 +263,7 @@ class Controller(Thread):
         return actualLightState
 
 
-    #TODO refactor to merge the sim functions and normal functions.
+    # TODO refactor to merge the sim functions and normal functions.
     def isHourInIntervalSim(self, period,on,off,actualTime):
         p = self.experiment[period]
         hour = actualTime.time()
@@ -425,7 +426,7 @@ class Controller(Thread):
     def checkArduinoAlive(self):
         if self.ser.is_open:
             self.ser.write(b'C\r')
-            sleep(1)
+            sleep(0.01)
             res = self.ser.readline()
             if not res.find(b'Led controller') >= 0:
                 self.openSerial(self.incubator)
