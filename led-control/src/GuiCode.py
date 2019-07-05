@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'GuiCode.ui',
 # licensing of 'GuiCode.ui' applies.
 #
-# Created: Thu Jul  4 16:38:05 2019
+# Created: Fri Jul  5 12:23:06 2019
 #      by: pyside2-uic  running on PySide2 5.12.4
 #
 # WARNING! All changes made in this file will be lost!

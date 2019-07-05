@@ -174,11 +174,11 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             itemSOff.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,4,itemSOff)
 
-            itemLL = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isLL  else "no"))
+            itemLL = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isLL else "no"))
             itemLL.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,5,itemLL)
 
-            itemDD = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isDD  else "no"))
+            itemDD = QtWidgets.QTableWidgetItem("{0}".format("yes" if period.isDD else "no"))
             itemDD.setTextAlignment(QtCore.Qt.AlignCenter)
             self.tableWidget.setItem(i,6,itemDD)
 
@@ -209,7 +209,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #TODO improve this handling exception
            pass
 
-        if len(periodToUptade) == 1 :
+        if len(periodToUptade) == 1:
 
             self.buttonUpdate.show()
             self.buttonAddPeriod.setText("Copy Period")
