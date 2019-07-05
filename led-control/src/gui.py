@@ -393,7 +393,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.buttonSim.setEnabled(False)
                         self.buttonStop.setEnabled(True)
                         self.drawCurrentPeriod()
-                        self.timer.start(60000)
+                        self.timer.start(6000)
                     else:
                         self.stopExperiment()
                         print("stopped")
@@ -411,6 +411,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         It sets the flag to stop the running experiment in the control thread.
         """
         if hasattr(self, 'control'):
+            print("stopping control")
             self.control.setIsExperimentRunning(False)
             self.control.join()
             if not self.control.isAlive():
@@ -421,13 +422,14 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             # added to prevent blockage when something happened.
             # TODO Improve this and detect why that can happen.
+            print("stop, no control")
             try:
                 self.buttonStart.setEnabled(True)
                 self.buttonSim.setEnabled(True)
                 self.buttonStop.setEnabled(False)
                 self.timer.stop()
             except Exception as e:
-                print (e)
+                print(e)
 
     def drawCurrentPeriod(self):
         period=self.control.getRunningPeriod()
@@ -536,7 +538,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def updateDrawCurrentPeriod(self):
         if self.periodUpdated == True:
-            print("updated")
+            print("updating")
             self.control.simulateExperiment(QtCore.QDateTime.currentDateTime())
             self.drawCurrentPeriod()
             self.periodUpdated = False
@@ -582,6 +584,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.graphicsView.setScene(self.graph)
             self.graphicsView.show()
+            print("updated")
 
         if self.control.getIsExperimentRunning() == False:
             self.stopExperiment()

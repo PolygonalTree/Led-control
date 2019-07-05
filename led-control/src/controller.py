@@ -38,19 +38,16 @@ class Controller(Thread):
         self.incubator = incubator
         self.ser = None
         self.previousLightState = None
-        self.isExperimentRunning = None
+        self.isExperimentRunning = False
         self.currentPeriod = None
 
     def run(self):
-
-        self.isExperimentRunning = None
-
         try:
             time = QtCore.QDateTime.currentDateTime()
             #self.debugTime = time
             actualDate = time.date()
             timer = QtCore.QElapsedTimer()
-            isSerialOpen=self.openSerial(self.incubator)
+            isSerialOpen = self.openSerial(self.incubator)
             print(isSerialOpen)
 
             if isSerialOpen:
@@ -61,9 +58,10 @@ class Controller(Thread):
                 self.previousLightState = None
                 timer.start()
                 while self.isExperimentRunning:
-                    if timer.elapsed() > 60000:
+                    if timer.elapsed() > 6000:
                         # check serial is open
                         self.checkArduinoAlive()
+                        sleep(0.2)
                         self.mainController()
                         timer.restart()
                         # sleep to save cpu, if more than 0.2 it becomes apparently
@@ -92,13 +90,13 @@ class Controller(Thread):
                 self.isExperimentRunning = False
             else:
                 period = self.experiment[self.currentPeriod]
-                #check if it is the last period.
+                # check if it is the last period.
                 colour = period.lightColour
                 isRampingOn = period.isRampingOn
                 rampPercent = 1
-                ##Decide if the lights needs to be on or off
+                # Decide if the lights needs to be on or off
                 if period.isLL:
-                        #ramping on first day:
+                        # ramping on first day:
                         endsRamping = period.switchOnTime.addSecs(period.rampingTime*3600)
 
                         if (period.dateStartTime.__eq__(actualTime.date())
@@ -181,7 +179,7 @@ class Controller(Thread):
                                                       colour[3],
                                                       rampPercent])
         except Exception as e:
-            print (e)
+            print(e)
             self.closeSerial()
             self.isExperimentRunning = False
 
@@ -192,8 +190,8 @@ class Controller(Thread):
         last = False
         first = True
         for period in self.experiment:
-            ##ADD the hour of starting for the next period, just in case they are coincident,
-            ## i.e. for periods shorter than 24h.
+            # ADD the hour of starting for the next period, just in case they are coincident,
+            # i.e. for periods shorter than 24h.
             currentPeriod = None
             try:
                 index = self.experiment.index(period)+1
@@ -201,8 +199,8 @@ class Controller(Thread):
             except:
                 last = True
 
-            #check if logic inverted, logic will be inverted when switch off time happens
-            #before in time than switch on time.
+            # check if logic inverted, logic will be inverted when switch off time happens
+            # before in time than switch on time.
             if period.switchOffTime.__le__(period.switchOnTime):
                 #logich inverted
                 if (period.dateStartTime.__le__(currentDate)
@@ -216,11 +214,11 @@ class Controller(Thread):
                         else:
                             currentPeriod =  self.experiment.index(period)+1
                     else:
-                        #if this is the last period, return None
+                        # if this is the last period, return None
                         currentPeriod =  self.experiment.index(period)
                         break
             else:
-                #normal logic
+                # normal logic
                 if (period.dateStartTime.__le__(currentDate)
                         and period.dateEndTime.__ge__(currentDate)):
                     if (not last
@@ -233,7 +231,7 @@ class Controller(Thread):
                             currentPeriod = self.experiment.index(period)+1
                     else:
                         currentPeriod = self.experiment.index(period)
-                        break ##catch only the first ocurrence
+                        break  # catch only the first ocurrence
 
             NextItem += 1
             first=False
@@ -246,24 +244,23 @@ class Controller(Thread):
         off = self.experiment[period].switchOffTime
         currentTime = QtCore.QTime.currentTime()
         if  off.__le__(on):
-            #logic inverted
+            # logic inverted
             if on.__ge__(currentTime) and off.__le__(currentTime):
-                #inverted logic, lights off!
+                # inverted logic, lights off!
                 actualLightState = self.previousLightState
             else:
-                #lights on!
+                # lights on!
                 actualLightState = True
         elif off.__ge__(on):
-            #standart logic
+            # standart logic
             if  on.__le__(currentTime) and off.__ge__(currentTime):
-                #lights on!
+                # lights on!
                 actualLightState = self.previousLightState
             else:
-                #lights Off!
+                # lights Off!
                 actualLightState = False
 
         return actualLightState
-
 
     # TODO refactor to merge the sim functions and normal functions.
     def isHourInIntervalSim(self, period,on,off,actualTime):
@@ -272,28 +269,28 @@ class Controller(Thread):
         date = actualTime.date()
 
         if  off.__le__(on):
-            #logic inverted
+            # logic inverted
             if p.dateStartTime.__eq__(date) and on.__ge__(hour):
-                #inverted logic, lights off!
+                # inverted logic, lights off!
                 actualLightState = self.previousLightState
             elif on.__ge__(hour) and off.__le__(hour):
-                #check if it is the first day of the period to avoid extrange behaviour
+                # check if it is the first day of the period to avoid extrange behaviour
                  actualLightState = False
             else:
-                #lights on!
+                # lights on!
                  actualLightState = True
 
         elif off.__ge__(on):
-            #standart logic
+            # standart logic
             if p.dateStartTime.__eq__(date) and on.__ge__(hour):
-                #inverted logic, lights off!
+                # inverted logic, lights off!
                 actualLightState = self.previousLightState
             elif  on.__le__(hour) and off.__ge__(hour):
-                #lights on!
-                 actualLightState = True
+                # lights on!
+                actualLightState = True
             else:
-                #lights Off!
-                 actualLightState = False
+                # lights Off!
+                actualLightState = False
 
         self.previousLightState = actualLightState
 
@@ -301,12 +298,12 @@ class Controller(Thread):
 
     def simulateExperiment(self, startTime, hours = None):
         if hours is None:
-            hours = 1200 #45 days of simulation if nothing given!
+            hours = 1200  # 45 days of simulation if nothing given!
 
         timeToSimulate = hours*60*60*1000
         futureTime = startTime
         self.futureLightHistory = []
-        timeSimulationEnds=startTime.addMSecs(timeToSimulate)
+        timeSimulationEnds = startTime.addMSecs(timeToSimulate)
         while futureTime < timeSimulationEnds:
             futureDate = futureTime.date()
             futurePeriod = self.periodActive(futureTime)
@@ -315,14 +312,14 @@ class Controller(Thread):
                 self.endExperimentTime = futureTime
                 break
             else:
-                ## Get the active colour lights
+                # Get the active colour lights
                 period = self.experiment[futurePeriod]
                 colour = period.lightColour
                 isRampingOn = period.isRampingOn
                 rampPercent = 1
-                ##Decide if the lights needs to be on or off
+                # Decide if the lights needs to be on or off
                 if self.experiment[futurePeriod].isLL:
-                    #ramping on first day:
+                    # ramping on first day:
                     endsRamping = period.switchOnTime.addSecs(period.rampingTime*3600)
                     if (period.dateStartTime.__eq__(futureTime.date())
                         and period.switchOnTime.__gt__(futureTime.time())):
@@ -384,7 +381,7 @@ class Controller(Thread):
                                                     colour[3],
                                                     rampPercent])
 
-            futureTime = futureTime.addMSecs(60000) #add 1min
+            futureTime = futureTime.addMSecs(60000)  # add 1min
 
             #print("Sim ended")
 
@@ -398,18 +395,18 @@ class Controller(Thread):
                     print (port[0])
                     self.ser = serial.Serial(port[0], 9600)
                     self.ser.write(b'C\r')
-                    sleep(1)
+                    sleep(0.5)
                     res = self.ser.readline()
                     print (res.find(b'Led controller'))
                     if res.find(b'Led controller')>=0 :
                         print("Arduino connected")
-                        #block the arduino during experimnent to prevent errors
+                        # block the arduino during experimnent to prevent errors
                         f = open('config.cfg','rb')
                         incubators= pickle.load(f)
                         for i in incubators:
                             if i['SN'] == incubator['SN']:
                                 i.update(isRunning=True)
-                        #print (incubators)
+                        # print (incubators)
                         f.close()
                         with open('config.cfg', 'wb') as f:
                             pickle.dump(incubators,f, pickle.HIGHEST_PROTOCOL)
@@ -421,25 +418,25 @@ class Controller(Thread):
                         return False
 
     def checkArduinoAlive(self):
-        if self.ser.is_open:
-            self.ser.write(b'C\r')
-            sleep(0.01)
-            res = self.ser.readline()
-            if not res.find(b'Led controller') >= 0:
-                self.openSerial(self.incubator)
-        else:
+        print("serial", self.ser.is_open)
+        if not self.ser.is_open:
+            print("something, happend")
+            self.ser.__del__()
             self.openSerial(self.incubator)
+
+        return True
+
 
     def closeSerial(self):
         if self.ser.is_open:
             self.writeDataToArduino(False,[0,0,0,0])
             self.ser.__del__()
-        f = open('config.cfg','rb')
-        incubators= pickle.load(f)
-        for i in incubators:
-            if i['SN'] == self.incubator['SN']:
-                i.update(isRunning=False)
-        f.close()
+        with open('config.cfg','rb') as f:
+            incubators= pickle.load(f)
+            for i in incubators:
+                if i['SN'] == self.incubator['SN']:
+                    i.update(isRunning=False)
+                    
         with open('config.cfg', 'wb') as f:
             pickle.dump(incubators,f, pickle.HIGHEST_PROTOCOL)
 
@@ -656,5 +653,7 @@ class Controller(Thread):
     def getIsExperimentRunning(self):
         return self.isExperimentRunning
 
-    def setIsExperimentRunning(self,boolean):
-        self.isExperimentRunning = boolean
+    def setIsExperimentRunning(self, flag):
+        self.isExperimentRunning = flag
+        print('running:',self.isExperimentRunning)
+        return self.isExperimentRunning
