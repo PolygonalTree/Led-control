@@ -351,8 +351,29 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             f.close()
         except:
             pass
+        # change dates to actual day
+        actualTime = QtCore.QDateTime.currentDateTime()
+        p0 = self.exp.experiment[0]
+        print(p0.dateStartTime)
+        print(self.exp.experiment[0].dateEndTime)
+        if p0.dateStartTime.__lt__(actualTime.date()):
+            gap =p0.dateStartTime.daysTo(actualTime.date())
+            print(gap)
+            # update start day to today
+            self.exp.experiment[0].dateStartTime=actualTime.date()
+            self.exp.experiment[0].dateEndTime=p0.dateEndTime.addDays(gap)
+
+            for period in self.exp.experiment[1:]:
+                period.dateStartTime = period.dateStartTime.addDays(gap)
+                period.dateEndTime = period.dateStartTime.addDays(gap)
 
         self.printTable()
+
+    def update_saved_exp_to_actual_date(self,period,jump_in_time=0):
+        actualTime = QtCore.QDateTime.currentDateTime()
+        if period.dataStartTime.__lt__(actualTime.date()):
+            # update start day to today
+            period.dateStartTime=actualTime.date().addDays(jump_in_time)
 
 
     @QtCore.Slot()
@@ -410,7 +431,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         Dialog to stop the experiment running in an incubator
         It sets the flag to stop the running experiment in the control thread.
         """
-        if hasattr(self, 'control'):
+        if hasattr(self, 'control') and self.control is not None:
             print("stopping control")
             self.control.setIsExperimentRunning(False)
             self.control.join()

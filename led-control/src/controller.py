@@ -212,10 +212,10 @@ class Controller(Thread):
                         if last:
                             currentPeriod = None
                         else:
-                            currentPeriod =  self.experiment.index(period)+1
+                            currentPeriod = self.experiment.index(period)+1
                     else:
                         # if this is the last period, return None
-                        currentPeriod =  self.experiment.index(period)
+                        currentPeriod = self.experiment.index(period)
                         break
             else:
                 # normal logic

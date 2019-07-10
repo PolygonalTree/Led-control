@@ -38,7 +38,7 @@ class Period():
     def __init__(self):
         self.lightColour = [0,0,0,0] #RGBW list, values from 0 to 255
         self.dateStartTime = [] ### PySide.QtCore.QDate object.
-        self.dateEndtime = [] ## PySide.QtCore.QDate object.
+        self.dateEndTime = [] ## PySide.QtCore.QDate object.
         self.switchOnTime = [9,0] #tupla hour-minutes
         self.switchOffTime = [21,0]
         #self.isIntervalHours = True
