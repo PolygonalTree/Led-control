@@ -9,7 +9,7 @@ Any collaboration is wellcome.
 
 ## Installation:
 
-The LED control is a python package with PySide 1.2.4 as dependency. Due to this dependency it is compatible with python version until 3.4. It is possible to use it with python 3.6 but some tinkering is neccesary.(or the use of a linux distro).
+The LED control is a python package with PySide 2 as dependency. Due to this dependency it is compatible with python version until 3.4. It is possible to use it with python 3.6 but some tinkering is neccesary.(or the use of a linux distro).
 It can be installed following this steps.
 1. Install PySide. Follow the instructions for your specific operating system: https://pypi.python.org/pypi/PySide/1.2.4
 1. Download the Led-control zip file from Github.

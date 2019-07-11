@@ -24,7 +24,7 @@ setup(
     # Alternatively, if you want to distribute just a my_module.py, uncomment
     # this:
     #   py_modules=["my_module"]
-    install_requires=['pyside'],
+    install_requires=['pyside2'],
     entry_points={
         'console_scripts': [
             'led-controller=gui:main',

@@ -3,12 +3,28 @@ import pickle
 from PySide2 import QtCore, QtGui, QtSql
 actualTime = QtCore.QDateTime.currentDateTime()
 
-f = open("../../experiments_saved/text3.exp", "rb")
-exp = pickle.load(f)
-exp.experiment[0].dateStartTime = actualTime.date().addDays(-5)
-print(exp.experiment[0].dateStartTime)
-print(exp.experiment[0].dateEndTime)
-f.close()
+import PySide2
+import sys
+sys.modules["PySide"] = PySide2
+import os
+p="/run/media/luis/food/experiments_saved/"
+exp_to_save = []
+for file in os.listdir(p):
+    print(file)
+    f = open(os.path.join(p,file), "rb")
+    exp = pickle.load(f)
+    for e in exp.experiment:
+        e.dateStartTime = actualTime.date().addDays(1)
+        e.dateEndTime = actualTime.date().addDays(1)
+    exp_to_save.append((file,e))
+    f.close()
 
-with open("../../experiments_saved/text2.exp", "wb") as f:
-    pickle.dump(exp, f, -1)
+from model import *
+import pickle
+from PySide2 import QtCore, QtGui, QtSql
+sys.modules["PySide"] = ""
+import json
+
+for p,e in exp_to_save:
+    with open("../../experiments_saved/{}".format(p), "wb") as f:
+        json.dumps(e)

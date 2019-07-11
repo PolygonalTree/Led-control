@@ -68,6 +68,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.selectedPeriod = None
         self.control = None
         self.incubatorName = None
+        self.startExperimentTime = None
 
 
     @QtCore.Slot()
@@ -349,18 +350,19 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             f = open(fileName[0], 'rb')
             self.exp = pickle.load(f)
             f.close()
-        except:
-            pass
+        except Exception as e:
+            print(e)
         # change dates to actual day
-        actualTime = QtCore.QDateTime.currentDateTime()
+        actualDate = QtCore.QDateTime.currentDateTime().date()
         p0 = self.exp.experiment[0]
         print(p0.dateStartTime)
         print(self.exp.experiment[0].dateEndTime)
-        if p0.dateStartTime.__lt__(actualTime.date()):
-            gap =p0.dateStartTime.daysTo(actualTime.date())
+        print(p0.dateStartTime.__lt__(actualDate))
+        if p0.dateStartTime.__lt__(actualDate):
+            gap =p0.dateStartTime.daysTo(actualDate)
             print(gap)
             # update start day to today
-            self.exp.experiment[0].dateStartTime=actualTime.date()
+            self.exp.experiment[0].dateStartTime=actualDate
             self.exp.experiment[0].dateEndTime=p0.dateEndTime.addDays(gap)
 
             for period in self.exp.experiment[1:]:
@@ -368,12 +370,6 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 period.dateEndTime = period.dateStartTime.addDays(gap)
 
         self.printTable()
-
-    def update_saved_exp_to_actual_date(self,period,jump_in_time=0):
-        actualTime = QtCore.QDateTime.currentDateTime()
-        if period.dataStartTime.__lt__(actualTime.date()):
-            # update start day to today
-            period.dateStartTime=actualTime.date().addDays(jump_in_time)
 
 
     @QtCore.Slot()
@@ -415,6 +411,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.buttonStop.setEnabled(True)
                         self.drawCurrentPeriod()
                         self.timer.start(6000)
+                        self.startExperimentTime = QtCore.QDateTime.currentDateTime()
                     else:
                         self.stopExperiment()
                         print("stopped")
@@ -467,10 +464,10 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         i=0
         heigh = 20
         for item in pastLightHistory:
-            x = i
+            x = int(item[6])
             y = 0
             if item[0] == 0:
-                self.graph.addLine(i,y,i,heigh)
+                self.graph.addLine(x,y,x,heigh)
             elif item[0] == 1:
                 R = 255 if item[1] > 0 else 0
                 G = 255 if item[2] > 0 else 0
@@ -478,47 +475,47 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 W = 0 if item[4] > 0 else 255
                 colourPen = QtGui.QColor(R,G,B,W)
                 pen.setColor(colourPen)
-                self.graph.addLine(i,y,i,heigh,pen)
-                self.graph.addLine(i,y,i,y)
-                self.graph.addLine(i,heigh,i,heigh)
+                self.graph.addLine(x,y,x,heigh,pen)
+                self.graph.addLine(x,y,x,y)
+                self.graph.addLine(x,heigh,x,heigh)
                 if item[5]>0:
-                    self.graph.addLine(i,y,i,(1-item[5])*heigh)
+                    self.graph.addLine(x,y,x,(1-item[5])*heigh)
             elif item[0] == -1:
-                self.graph.addLine(i,y,i,heigh)
+                self.graph.addLine(x,y,x,heigh)
                 endTime = self.control.getEndExperimentTime()
                 endTime = endTime.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("Ends on {0}".format(endTime))
-                text.setPos(i,-22)
+                text.setPos(x,-22)
                 break
             ##initialize prevItem
             if i == 0:
                 prevItem = item[0]
-                self.graph.addLine(i,y,i,heigh)
+                self.graph.addLine(x,y,x,heigh)
                 startedTime = actualTime.toString("dd.MM.yy hh:mm")
                 self.updatedText = self.graph.addText("Updated on {0}".format(startedTime))
                 self.updatedText.setPos(-170, 0)
             ##add the hour when the condition change
             if prevItem != item[0]:
-                self.graph.addLine(i,-20,i,heigh)
-                hour = actualTime.addSecs(i*60)
+                self.graph.addLine(x,-20,x,heigh)
+                hour = actualTime.addSecs(x*60)
                 hour = hour.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("{0}".format(hour))
-                text.setPos(i,0)
+                text.setPos(x,0)
 
             prevItem = item[0]
             i += 1
 
 
-        self.nowLine = self.graph.addLine(i,-20,i,heigh)
+        self.nowLine = self.graph.addLine(x,-20,x,heigh)
         self.nowText = self.graph.addText("Now")
-        self.nowText.setPos(i,-22)
-        now_counter = i
+        self.nowText.setPos(x,-22)
+        now_counter = x
         for item in futureLightHistory:
-            x = i
+            x = int(item[6])
             y = 0
             heigh = 20
             if item[0] == 0:
-                self.graph.addLine(i,y,i,heigh)
+                self.graph.addLine(x,y,x,heigh)
             elif item[0] == 1:
                 R = 255 if item[1] > 0 else 0
                 G = 255 if item[2] > 0 else 0
@@ -526,26 +523,26 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 W = 0 if item[4] > 0 else 255
                 colourPen = QtGui.QColor(R,G,B,W)
                 pen.setColor(colourPen)
-                self.graph.addLine(i,y,i,heigh,pen)
-                self.graph.addLine(i,y,i,y)
-                self.graph.addLine(i,heigh,i,heigh)
+                self.graph.addLine(x,y,x,heigh,pen)
+                self.graph.addLine(x,y,x,y)
+                self.graph.addLine(x,heigh,x,heigh)
                 if item[5]>0:
-                    self.graph.addLine(i,y,i,(1-item[5])*heigh)
+                    self.graph.addLine(x,y,x,(1-item[5])*heigh)
             elif item[0] == -1:
-                self.graph.addLine(i,y,i,heigh)
+                self.graph.addLine(x,y,x,heigh)
                 endTime = self.control.getEndExperimentTime()
                 endTime = endTime.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("Ends on {0}".format(endTime))
-                text.setPos(i,0)
+                text.setPos(x,0)
                 break
             ##initialize prevItem
             ##add the hour when the condition change
             if prevItem != item[0]:
-                self.graph.addLine(i,-20,i,heigh)
-                hour = actualTime.addSecs((i-now_counter)*60)
+                self.graph.addLine(x,-20,x,heigh)
+                hour = actualTime.addSecs((x-now_counter)*60)
                 hour = hour.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("{0}".format(hour))
-                text.setPos(i,-22)
+                text.setPos(x,-22)
 
             prevItem = item[0]
             i += 1
@@ -580,7 +577,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             i=0
             heigh = 20
             for item in pastLightHistory:
-                x = i
+                x = int(item[6])
                 y = 0
                 ##initialize prevItem
                 if i == 0:
@@ -594,12 +591,14 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.graph.removeItem(self.nowLine)
             self.graph.removeItem(self.nowText)
-            self.nowLine = self.graph.addLine(i,-20,i,heigh)
+            position_of_now = int(self.startExperimentTime.secsTo(actualTime)/60)
+            print("position", position_of_now)
+            self.nowLine = self.graph.addLine(position_of_now,-20,position_of_now,heigh)
             self.nowText = self.graph.addText("Now")
-            self.nowText.setPos(i,-22)
+            self.nowText.setPos(position_of_now,-22)
             now_counter = i
             for item in futureLightHistory:
-                x = i
+                x = int(item[6])
                 y = 0
                 i += 1
 
@@ -621,16 +620,17 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             simEndTime = QtCore.QDateTime()
             simEndTime.setDate(self.exp.experiment[-1].dateEndTime)
-            simEndTime = simEndTime.addDays(2)
+            simEndTime = simEndTime.addDays(1).addSecs(6)
 
             interval = simStartTime.secsTo(simEndTime)/3600.
             if interval == 0:
                 interval = 24 #simulate at least 24 hours
 
-            self.control.simulateExperiment(simStartTime,interval)
+            self.control.simulateExperiment(simStartTime, interval)
             futureLightHistory = self.control.getFutureLightHistory()
+            print(futureLightHistory)
 
-            f = open('daylight','w')
+            f = open('daylight', 'w')
             f.write('{0}\r'.format(simStartTime.toString('dd.MM.yyyy hh:mm')))
             l = int(len(futureLightHistory)/30)
             for i in range (0,l):
@@ -644,11 +644,11 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             i = 0
             for item in futureLightHistory:
-                x = i
+                x = item[6]
                 y = 0
                 heigh = 20
                 if item[0] == 0:
-                    self.graph.addLine(i,y,i,heigh)
+                    self.graph.addLine(x,y,x,heigh)
                 elif item[0] == 1:
                     R = 255 if item[1] > 0 else 0
                     G = 255 if item[2] > 0 else 0
@@ -656,32 +656,32 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     W = 0 if item[4] > 0 else 255
                     colourPen = QtGui.QColor(R,G,B,W)
                     pen.setColor(colourPen)
-                    self.graph.addLine(i,y,i,heigh,pen)
-                    self.graph.addLine(i,y,i,y)
-                    self.graph.addLine(i,heigh,i,heigh)
+                    self.graph.addLine(x,y,x,heigh,pen)
+                    self.graph.addLine(x,y,x,y)
+                    self.graph.addLine(x,heigh,x,heigh)
                     if item[5]>0:
-                        self.graph.addLine(i,y,i,(1-item[5])*heigh)
+                        self.graph.addLine(x,y,x,(1-item[5])*heigh)
                 elif item[0] == -1:
-                    self.graph.addLine(i,-20,i,heigh)
+                    self.graph.addLine(x,-20,x,heigh)
                     endTime = self.control.getEndExperimentTime()
                     endTime = endTime.toString("dd.MM.yy hh:mm")
                     text = self.graph.addText("Ends on {0}".format(endTime))
-                    text.setPos(i,-22)
+                    text.setPos(x,-22)
                     break
                 ##initialize prevItem
                 if i == 0:
                     prevItem = item[0]
-                    self.graph.addLine(i,y,i,heigh)
+                    self.graph.addLine(x,y,x,heigh)
                     startTime = simStartTime.toString("dd.MM.yy hh:mm")
                     text = self.graph.addText("Starts on {0}".format(startTime))
                     text.setPos(-160,0)
                 ##add the hour when the condition change
                 if prevItem != item[0]:
-                    self.graph.addLine(i,y,i,heigh)
+                    self.graph.addLine(x,y,x,heigh)
                     hour = simStartTime.addSecs(i*60)
                     hour = hour.toString("dd.MM.yy hh:mm")
                     text = self.graph.addText("{0}".format(hour))
-                    text.setPos(i,-22)
+                    text.setPos(x,-22)
 
                 prevItem = item[0]
                 i += 1
