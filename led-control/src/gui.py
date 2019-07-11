@@ -539,7 +539,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ##add the hour when the condition change
             if prevItem != item[0]:
                 self.graph.addLine(x,-20,x,heigh)
-                hour = actualTime.addSecs((x-now_counter)*60)
+                hour = actualTime.addSecs(x*60)
                 hour = hour.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("{0}".format(hour))
                 text.setPos(x,-22)

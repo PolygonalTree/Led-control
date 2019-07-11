@@ -96,7 +96,7 @@ class Controller(Thread):
             if self.currentPeriod is None:
                 if isSimulation:
                     self.futureLightHistory.append([-1,0,0,0,0,0,timeSinceStart])
-                    self.endExperimentTime = futureTime
+                    self.endExperimentTime = actualTime
                 else:
                     self.isExperimentRunning = False
 
@@ -295,85 +295,12 @@ class Controller(Thread):
         timeSimulationEnds = startTime.addMSecs(timeToSimulate)
         while futureTime < timeSimulationEnds:
             self.mainController(True, startTime, futureTime)
-            # futureDate = futureTime.date()
-            # futurePeriod = self.periodActive(futureTime)
-            # if futurePeriod is None:
-            #     self.futureLightHistory.append([-1,0,0,0,0,0])
-            #     self.endExperimentTime = futureTime
-            #     break
-            # else:
-            #     # Get the active colour lights
-            #     period = self.experiment[futurePeriod]
-            #     colour = period.lightColour
-            #     isRampingOn = period.isRampingOn
-            #     rampPercent = 1
-            #     # Decide if the lights needs to be on or off
-            #     if self.experiment[futurePeriod].isLL:
-            #         # ramping on first day:
-            #         endsRamping = period.switchOnTime.addSecs(period.rampingTime*3600)
-            #         if (period.dateStartTime.__eq__(futureTime.date())
-            #             and period.switchOnTime.__gt__(futureTime.time())):
-            #             self.futureLightHistory.append([0,
-            #                                             colour[0],
-            #                                             colour[1],
-            #                                             colour[2],
-            #                                             colour[3],
-            #                                             rampPercent])
-            #         elif (period.dateStartTime.__eq__(futureTime.date())
-            #             and endsRamping.__gt__(futureTime.time())):
-            #             colour, rampPercent = self.rampingProccesing(futureTime.time(), isRampingOn, period)
-            #             self.futureLightHistory.append([1,
-            #                                             colour[0],
-            #                                             colour[1],
-            #                                             colour[2],
-            #                                             colour[3],
-            #                                             rampPercent])
-            #         else:
-            #             colour, rampPercent = self.rampingProccesing(futureTime.time(), False, period)
-            #             self.futureLightHistory.append([1,
-            #                                             colour[0],
-            #                                             colour[1],
-            #                                             colour[2],
-            #                                             colour[3],
-            #                                             rampPercent])
-            #     elif self.experiment[futurePeriod].isDD:
-            #         if (period.dateStartTime.__eq__(futureTime.date())
-            #                 and period.switchOnTime.__gt__(futureTime.time())):
-            #             self.futureLightHistory.append([0,
-            #                                             colour[0],
-            #                                             colour[1],
-            #                                             colour[2],
-            #                                             colour[3],
-            #                                             rampPercent])
-            #         else:
-            #             self.futureLightHistory.append([0,
-            #                                             colour[0],
-            #                                             colour[1],
-            #                                             colour[2],
-            #                                             colour[3],
-            #                                             rampPercent])
-            #     elif self.isHourInIntervalSim(futurePeriod,
-            #                                   period.switchOnTime,
-            #                                   period.switchOffTime,
-            #                                   futureTime):
-            #         colour, rampPercent = self.rampingProccesing(futureTime.time(), isRampingOn, period)
-            #         self.futureLightHistory.append([1,
-            #                                         colour[0],
-            #                                         colour[1],
-            #                                         colour[2],
-            #                                         colour[3],
-            #                                         rampPercent])
-            #     else:
-            #         self.futureLightHistory.append([0,
-            #                                         colour[0],
-            #                                         colour[1],
-            #                                         colour[2],
-            #                                         colour[3],
-            #                                         rampPercent])
+            # security control:
+            if self.futureLightHistory[-1][0] < 0:
+                break
 
             futureTime = futureTime.addMSecs(60000)  # add 1min
 
-            #print("Sim ended")
 
     def openSerial(self, incubator):
         SNR = 0
