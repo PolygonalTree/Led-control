@@ -59,7 +59,7 @@ class Controller(Thread):
                 self.previousLightState = None
                 timer.start()
                 while self.isExperimentRunning:
-                    if timer.elapsed() > 6000:
+                    if timer.elapsed() > 60000:
                         # check serial is open
                         self.checkArduinoAlive()
                         sleep(0.2)
@@ -87,13 +87,15 @@ class Controller(Thread):
             actualTime = QtCore.QDateTime.currentDateTime()
             # time since start in min
             startExperimentTime = self.startExperimentTime
-
-        timeSinceStart = startExperimentTime.secsTo(actualTime) / 60
+        if self.isExperimentRunning:
+            timeSinceStart = self.startExperimentTime.secsTo(actualTime) / 60
+        else:
+            timeSinceStart = startExperimentTime.secsTo(actualTime) / 60
         #currentDate = actualTime.date()
-        self.currentPeriod = self.periodActive(actualTime)
+        currentPeriod = self.periodActive(actualTime)
 
         try:
-            if self.currentPeriod is None:
+            if currentPeriod is None:
                 if isSimulation:
                     self.futureLightHistory.append([-1,0,0,0,0,0,timeSinceStart])
                     self.endExperimentTime = actualTime
@@ -101,7 +103,7 @@ class Controller(Thread):
                     self.isExperimentRunning = False
 
             else:
-                period = self.experiment[self.currentPeriod]
+                period = self.experiment[currentPeriod]
                 # check if it is the last period.
                 isLightsOn = False
                 colour = period.lightColour
@@ -134,7 +136,7 @@ class Controller(Thread):
                     else:
                         isLightsOn = False
 
-                elif self.isHourInIntervalSim(self.currentPeriod,
+                elif self.isHourInIntervalSim(currentPeriod,
                                               period.switchOnTime,
                                               period.switchOffTime,
                                               actualTime):
@@ -159,6 +161,7 @@ class Controller(Thread):
                                                     rampPercent,
                                                     timeSinceStart])
                 else:
+                    self.currentPeriod = currentPeriod
                     self.writeDataToArduino(isLightsOn, colour, period)
                     self.pastLightHistory.append([int(isLightsOn),
                                                   colour[0],
@@ -228,7 +231,7 @@ class Controller(Thread):
 
     ##Decide if the lights needs to be on or off
     def isHourInInterval(self):
-        period = self.currentPeriod
+        period = currentPeriod
         on = self.experiment[period].switchOnTime
         off = self.experiment[period].switchOffTime
         currentTime = QtCore.QTime.currentTime()
@@ -252,18 +255,23 @@ class Controller(Thread):
         return actualLightState
 
     # TODO refactor to merge the sim functions and normal functions.
-    def isHourInIntervalSim(self, period,on,off,actualTime):
+    def isHourInIntervalSim(self, period, on, off, actualTime):
         p = self.experiment[period]
         hour = actualTime.time()
         date = actualTime.date()
 
-        if  off.__le__(on):
+        if off.__le__(on):
             # logic inverted
             if p.dateStartTime.__eq__(date) and on.__ge__(hour):
-                # inverted logic, lights off!
-                actualLightState = self.previousLightState
+                # inverted logic
+                #is this the first day, not info about previos light state
+                if self.experiment[0].dateStartTime.__eq__(date):
+                    actualLightState = False
+                else:
+                    # we get the info from previous state,
+                    actualLightState = self.previousLightState
             elif on.__ge__(hour) and off.__le__(hour):
-                # check if it is the first day of the period to avoid extrange behaviour
+                # check if it is the first day of the period to avoid odd behaviour
                  actualLightState = False
             else:
                 # lights on!
@@ -283,6 +291,8 @@ class Controller(Thread):
 
         self.previousLightState = actualLightState
 
+        print("lisght on?:",actualLightState)
+
         return actualLightState
 
     def simulateExperiment(self, startTime, hours = None):
@@ -293,6 +303,7 @@ class Controller(Thread):
         futureTime = startTime
         self.futureLightHistory = []
         timeSimulationEnds = startTime.addMSecs(timeToSimulate)
+        print("simulation started")
         while futureTime < timeSimulationEnds:
             self.mainController(True, startTime, futureTime)
             # security control:
@@ -300,6 +311,8 @@ class Controller(Thread):
                 break
 
             futureTime = futureTime.addMSecs(60000)  # add 1min
+        print("simulation ended")
+        self.previousLightState = None
 
 
     def openSerial(self, incubator):

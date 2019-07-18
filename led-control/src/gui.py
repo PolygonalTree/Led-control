@@ -410,7 +410,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.buttonSim.setEnabled(False)
                         self.buttonStop.setEnabled(True)
                         self.drawCurrentPeriod()
-                        self.timer.start(6000)
+                        self.timer.start(60000)
                         self.startExperimentTime = QtCore.QDateTime.currentDateTime()
                     else:
                         self.stopExperiment()
@@ -458,7 +458,8 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         try:
             self.label.setText("{0}->Period Running = {1}".format(self.incubatorName,period+1))
             pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
-        except:
+        except Exception as e:
+            print(e)
             self.label.setText("Experiment Ended")
             pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
         i=0
@@ -557,7 +558,10 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def updateDrawCurrentPeriod(self):
         if self.periodUpdated == True:
             print("updating")
+            print(QtCore.QDateTime.currentDateTime())
             self.control.simulateExperiment(QtCore.QDateTime.currentDateTime())
+            futureLightHistory = self.control.getFutureLightHistory()
+            #print(futureLightHistory)
             self.drawCurrentPeriod()
             self.periodUpdated = False
         else:
@@ -569,7 +573,8 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.label.setText("{0}->Period Running = {1}".format(self.incubatorName,period+1))
                 pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
-            except:
+            except Exception as e:
+                print(e)
                 self.label.setText("Experiment Ended")
                 pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
