@@ -3,16 +3,18 @@ const int ledPins[] = {5,6,9,10};
 char data;
 int BrightnessValue = 0;
 //intensity 0-255, 0-255, 0-255, 0-255, Frecuency of pulses in miliseconds, width of pulse in miliseconds
-int lights[] = {0,0,0,0,0,0};
+float lights[] = {0,0,0,0,0,0};
 unsigned long t = 0;
 unsigned long time = 0;
 unsigned long frec = 0;
 unsigned long error = 0;
+unsigned long burst = 0;
 int pW = 0;
 boolean pulses = false;
 boolean newCommand = false;
 volatile int state = LOW;
 char act;
+int counter = 0;
 
 void setup()
 {  
@@ -54,10 +56,10 @@ void loop() {
       lights[3] = Serial.parseInt();
 
     }else if (data == 'F'){
-      lights[4] = Serial.parseInt();
+      lights[4] = Serial.parseFloat();
+      Serial.print("frec");
       Serial.println(lights[4]);
       frec =lights[4]*1000.;
-      Serial.println(frec);
       //in microseconds
       lights[5] = Serial.parseInt();
       pulses = true;
@@ -86,25 +88,42 @@ void loop() {
   }     
   
   if(pulses == true && state == true){
-    time = micros();
+    if (lights[4]>=120000){
+      time = millis();
+      frec = lights[4];
+    }else{
+      time =micros();
+    }
+    //time = micros();
     if (time>=t){
-      // error 
+      //error 
       error = time-t;
       t = time+frec-error;
-      
-      analogWrite(5,lights[0]);
-      analogWrite(6,lights[1]);
-      analogWrite(9,lights[2]);
-      analogWrite(10,lights[3]);
-      delay(lights[5]);
-      analogWrite(5,0);
-      analogWrite(6,0);
-      analogWrite(9,0);
-      analogWrite(10,0);
+      //Serial.println("burst start");
+      //burst pulses
+      burst=micros()+(lights[5]*1000.);
+      counter = 0;
+      while(micros()<=burst){
+        analogWrite(5,lights[0]);
+        analogWrite(6,lights[1]);
+        analogWrite(9,lights[2]);
+        analogWrite(10,lights[3]);
+        delay(10);
+        analogWrite(5,0);
+        analogWrite(6,0);
+        analogWrite(9,0);
+        analogWrite(10,0);
+        delay(2000); //2seconds delay
+        counter += 1;
+      }
       //c code to switch off
       //PORTB = B00000000;
       //PORTD = B00000000;
       //Serial.println(micros());
+      //Serial.println("burst end");
+      //Serial.print("total time in burst");
+      //Serial.println(burst-(lights[5]*1000.));
+      //Serial.println(counter);
     newCommand= false;
     
     }
