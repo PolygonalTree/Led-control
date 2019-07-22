@@ -43,6 +43,7 @@ class Controller(Thread):
         self.startExperimentTime = None
         self.endExperimentTime = None
         self.prevData = None
+        self.prevport = None
 
     def run(self):
         try:
@@ -337,12 +338,13 @@ class Controller(Thread):
             if SNR != None:
                 if incubator['SN'] == SNR:
                     logging.debug("port {}".format(port[0]))
-                    self.ser = serial.Serial(port[0], 9600)
+                    self.ser = serial.Serial(port[0], 9600, timeout=10)
                     self.ser.write(b'C\r')
                     sleep(0.5)
                     res = self.ser.readline()
                     if res.find(b'Led controller')>=0 :
                         logging.debug("Arduino connected")
+                        self.prevport = self.ser.port
                         # block the arduino during experimnent to prevent errors
                         f = open('config.cfg','rb')
                         incubators= pickle.load(f)
@@ -363,12 +365,45 @@ class Controller(Thread):
     def checkArduinoAlive(self):
         logging.debug("serial open: {}".format(self.ser.is_open))
         isconnected = True
+        print(self.ser.is_open)
         if not self.ser.is_open:
             log_time = QtCore.QDateTime.currentDateTime()
-            loggin.warning("something, happend with arduino at {}".format(log_time.toString("dd.MM.yy hh:mm")))
+            logging.warning("something, happend with arduino at {}".format(log_time.toString("dd.MM.yy hh:mm")))
             self.closeSerial()
+            sleep(1)
             isconnected = self.openSerial(self.incubator)
+            print(isconnected)
+        else:
+            # try to connect
+            try:
+                self.ser.write(b'C\r')
+                sleep(0.5)
+                res = self.ser.readline()
+                if res.find(b'Led controller') < 0:
+                    self.closeSerial()
+                    isconnected = self.openSerial(self.incubator)
+                    print(isconnected)
+            except IOError as e:
+                print("Error on connecting to arduino {}".format(e))
+                for port in serial.tools.list_ports.comports():
+                    SNR = self.getSNR(port)
 
+                    if SNR != None:
+                        if self.incubator['SN'] == SNR:
+                            logging.debug("port {}".format(port[0]))
+                            self.ser.close()
+                            self.ser.port = port[0]
+                            self.ser.open()
+                            self.ser.write(b'C\r')
+                            sleep(0.5)
+                            res = self.ser.readline()
+                            if res.find(b'Led controller') >= 0:
+                                isconnected = True
+                            else:
+                                isconnected = False
+                    else:
+                        isconnected = False
+        print(isconnected)
         return isconnected
 
 
@@ -378,6 +413,7 @@ class Controller(Thread):
                 self.writeDataToArduino(False,[0,0,0,0])
                 self.ser.__del__()
         except Exception as e:
+            self.ser.__del__()
             logging.error(e)
         with open('config.cfg','rb') as f:
             incubators= pickle.load(f)
@@ -523,9 +559,11 @@ class Controller(Thread):
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
 
         # if data does not change avoid communication
-        if data != self.prevData:
+        if data != self.prevData or self.ser.port != self.prevport :
+            print("sending data to", self.ser.port)
             self.ser.write(bytes(data,'utf-8'))
             self.prevData = data
+            self.prevport = self.ser.port
 
     def rampingProccesing(self, actualTime, on, period):
         rampPercent = 1
