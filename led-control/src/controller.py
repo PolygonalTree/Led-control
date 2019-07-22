@@ -318,7 +318,7 @@ class Controller(Thread):
         futureTime = startTime
         self.futureLightHistory = []
         timeSimulationEnds = startTime.addMSecs(timeToSimulate)
-        print("simulation started")
+        #print("simulation started")
         while futureTime < timeSimulationEnds:
             self.mainController(True, startTime, futureTime)
             # security control:
@@ -326,7 +326,7 @@ class Controller(Thread):
                 break
 
             futureTime = futureTime.addMSecs(60000)  # add 1min
-        print("simulation ended")
+        #print("simulation ended")
         self.previousLightState = None
 
 
@@ -365,14 +365,12 @@ class Controller(Thread):
     def checkArduinoAlive(self):
         logging.debug("serial open: {}".format(self.ser.is_open))
         isconnected = True
-        print(self.ser.is_open)
         if not self.ser.is_open:
             log_time = QtCore.QDateTime.currentDateTime()
             logging.warning("something, happend with arduino at {}".format(log_time.toString("dd.MM.yy hh:mm")))
             self.closeSerial()
             sleep(1)
             isconnected = self.openSerial(self.incubator)
-            print(isconnected)
         else:
             # try to connect
             try:
@@ -382,9 +380,9 @@ class Controller(Thread):
                 if res.find(b'Led controller') < 0:
                     self.closeSerial()
                     isconnected = self.openSerial(self.incubator)
-                    print(isconnected)
+
             except IOError as e:
-                print("Error on connecting to arduino {}".format(e))
+                logging.error("Error on connecting to arduino {}".format(e))
                 for port in serial.tools.list_ports.comports():
                     SNR = self.getSNR(port)
 
@@ -403,7 +401,6 @@ class Controller(Thread):
                                 isconnected = False
                     else:
                         isconnected = False
-        print(isconnected)
         return isconnected
 
 
@@ -453,7 +450,6 @@ class Controller(Thread):
         incubatorDisplayList = []
         incubatorList = pickle.load(f)
         for port in serial.tools.list_ports.comports():
-            print('Port',port[2])
             SNR = self.getSNR(port)
             if SNR != None:
                 for incubator in incubatorList:
@@ -560,7 +556,7 @@ class Controller(Thread):
 
         # if data does not change avoid communication
         if data != self.prevData or self.ser.port != self.prevport :
-            print("sending data to", self.ser.port)
+            #print("sending data to", self.ser.port)
             self.ser.write(bytes(data,'utf-8'))
             self.prevData = data
             self.prevport = self.ser.port
