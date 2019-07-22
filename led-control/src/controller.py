@@ -41,6 +41,7 @@ class Controller(Thread):
         self.isExperimentRunning = False
         self.currentPeriod = None
         self.startExperimentTime = None
+        self.endExperimentTime = None
         self.prevData = None
 
     def run(self):
@@ -56,7 +57,8 @@ class Controller(Thread):
                 self.mainController()
                 # timer to only call the function every minute.
                 logging.debug("Simulation started")
-                self.simulateExperiment(time)
+                self.simulateExperiment(time, hours=(time.daysTo(
+                                                        QtCore.QDateTime(self.experiment[-1].dateEndTime))+1)*24)
                 logging.debug("Simulation ended")
                 self.isExperimentRunning = True
                 self.previousLightState = None
@@ -309,7 +311,7 @@ class Controller(Thread):
 
     def simulateExperiment(self, startTime, hours = None):
         if hours is None:
-            hours = 1200  # 45 days of simulation if nothing given!
+            hours = 1200  #45 days of simulation if nothing given!
 
         timeToSimulate = hours*60*60*1000
         futureTime = startTime
@@ -339,7 +341,6 @@ class Controller(Thread):
                     self.ser.write(b'C\r')
                     sleep(0.5)
                     res = self.ser.readline()
-                    #print (res.find(b'Led controller'))
                     if res.find(b'Led controller')>=0 :
                         logging.debug("Arduino connected")
                         # block the arduino during experimnent to prevent errors
@@ -454,14 +455,14 @@ class Controller(Thread):
                     for incubator in incubatorList:
                         if incubator['SN'] == SNR:
                             new = False
-                except:
-                    print ('error in add')
+                except Exception as e:
+                    logging.error('error in add. {}'.format(e))
                     pass
 
                 if new:
                 #is it an arduino?
                     try:
-                        print("new")
+                        logging.info("new incubator detected")
                         s = serial.Serial(port[0],9600, timeout=10)
                         s.write(b'C\r')
                         res = s.readline()
@@ -487,7 +488,7 @@ class Controller(Thread):
                 incubatorList = pickle.load(f)
         except:
             incubatorList = []
-            print("Open config file failed")
+            logging.warning("Open config file failed")
             pass
 
         for inc in incubatorList:
@@ -607,5 +608,5 @@ class Controller(Thread):
 
     def setIsExperimentRunning(self, flag):
         self.isExperimentRunning = flag
-        print('running:', self.isExperimentRunning)
+        logging.info('running: {}'.format(self.isExperimentRunning))
         return self.isExperimentRunning

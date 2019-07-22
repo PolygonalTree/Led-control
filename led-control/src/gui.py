@@ -354,16 +354,12 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.exp = pickle.load(f)
             f.close()
         except Exception as e:
-            print(e)
+            logging.error(e)
         # change dates to actual day
         actualDate = QtCore.QDateTime.currentDateTime().date()
         p0 = self.exp.experiment[0]
-        print(p0.dateStartTime)
-        print(self.exp.experiment[0].dateEndTime)
-        print(p0.dateStartTime.__lt__(actualDate))
         if p0.dateStartTime.__lt__(actualDate):
             gap =p0.dateStartTime.daysTo(actualDate)
-            print(gap)
             # update start day to today
             self.exp.experiment[0].dateStartTime=actualDate
             self.exp.experiment[0].dateEndTime=p0.dateEndTime.addDays(gap)
@@ -398,18 +394,17 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             incubatorName = d.dialog.listWidget.currentItem()
             logging.basicConfig(filename='./logs/led_control_{}.log'.format(incubatorName.text()
                                                                            ), level=logging.DEBUG)
-            logging.info("started")
             for incubator in incubators:
                 if str(incubatorName.text()) == str(incubator['name']):
                     self.control = Controller(self.exp.experiment, incubator)
                     self.control.start()
-                    print("starting...")
+                    logging.info("starting...")
                     i = 0
                     while not self.control.getIsExperimentRunning():
                         # wait for the experiment to start.
                         sleep(0.5)
                         # TODO add some sort of maximum waiting time.
-                    print("started")
+                    logging.info("started")
                     if self.control.getIsExperimentRunning():
                         self.incubatorName = incubatorName.text()
                         self.buttonStart.setEnabled(False)
@@ -420,7 +415,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.startExperimentTime = QtCore.QDateTime.currentDateTime()
                     else:
                         self.stopExperiment()
-                        print("stopped")
+                        logging.info("stopped")
 
 
         else:
@@ -555,7 +550,6 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.graph.addLine(x,-20,x,heigh)
                 hour = startTime.addSecs(x*60)
                 hour = hour.toString("dd.MM.yy hh:mm")
-                print(x, x * 60, hour)
                 text = self.graph.addText("{0}".format(hour))
                 text.setPos(x,-22)
 
@@ -571,11 +565,9 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def updateDrawCurrentPeriod(self):
         if self.periodUpdated == True:
-            print("updating")
-            print(QtCore.QDateTime.currentDateTime())
+            logging.info("updating at {}".format(QtCore.QDateTime.currentDateTime().toString("dd.MM.yy hh:mm")))
             self.control.simulateExperiment(QtCore.QDateTime.currentDateTime())
             futureLightHistory = self.control.getFutureLightHistory()
-            #print(futureLightHistory)
             self.drawCurrentPeriod()
             self.periodUpdated = False
         else:
@@ -588,7 +580,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
             except Exception as e:
-                print(e)
+                logging.error(e)
                 self.label.setText("Experiment Ended")
                 pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
                 nowLine = None
@@ -612,7 +604,6 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.graph.removeItem(self.nowLine)
             self.graph.removeItem(self.nowText)
             position_of_now = int(self.startExperimentTime.secsTo(actualTime)/60)
-            print("position", position_of_now)
             self.nowLine = self.graph.addLine(position_of_now,-20,position_of_now,heigh)
             self.nowText = self.graph.addText("Now")
             self.nowText.setPos(position_of_now,-22)
@@ -624,7 +615,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.graphicsView.setScene(self.graph)
             self.graphicsView.show()
-            print("updated")
+            #logging.debug("updated")
 
         if self.control.getIsExperimentRunning() == False:
             self.stopExperiment()
@@ -648,7 +639,6 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             self.control.simulateExperiment(simStartTime, interval)
             futureLightHistory = self.control.getFutureLightHistory()
-            print(futureLightHistory)
 
             f = open('daylight', 'w')
             f.write('{0}\r'.format(simStartTime.toString('dd.MM.yyyy hh:mm')))
