@@ -29,6 +29,8 @@ from unlock import *
 import pickle
 import sys, threading, os
 from time import sleep
+import logging
+
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
     QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
@@ -410,7 +412,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                         self.buttonSim.setEnabled(False)
                         self.buttonStop.setEnabled(True)
                         self.drawCurrentPeriod()
-                        self.timer.start(60000)
+                        self.timer.start(6000)
                         self.startExperimentTime = QtCore.QDateTime.currentDateTime()
                     else:
                         self.stopExperiment()
@@ -429,7 +431,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         It sets the flag to stop the running experiment in the control thread.
         """
         if hasattr(self, 'control') and self.control is not None:
-            print("stopping control")
+            logging.info("stopping control")
             self.control.setIsExperimentRunning(False)
             self.control.join()
             if not self.control.isAlive():
@@ -437,17 +439,19 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.buttonSim.setEnabled(True)
                 self.buttonStop.setEnabled(False)
                 self.timer.stop()
+                logging.info("quit")
         else:
             # added to prevent blockage when something happened.
             # TODO Improve this and detect why that can happen.
-            print("stop, no control")
+            logging.info("stop, no control")
             try:
                 self.buttonStart.setEnabled(True)
                 self.buttonSim.setEnabled(True)
                 self.buttonStop.setEnabled(False)
                 self.timer.stop()
+                logging.info("quit")
             except Exception as e:
-                print(e)
+                logging.error(e)
 
     def drawCurrentPeriod(self):
         period=self.control.getRunningPeriod()
@@ -459,11 +463,13 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.label.setText("{0}->Period Running = {1}".format(self.incubatorName,period+1))
             pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
         except Exception as e:
-            print(e)
+            logging.error(e)
             self.label.setText("Experiment Ended")
             pen = QtGui.QPen(QtCore.Qt.black, 1, QtCore.Qt.SolidLine)
         i=0
         heigh = 20
+        startTime = self.control.getStartExperimentTime()
+        endTime = self.control.getEndExperimentTime()
         for item in pastLightHistory:
             x = int(item[6])
             y = 0
@@ -483,7 +489,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.graph.addLine(x,y,x,(1-item[5])*heigh)
             elif item[0] == -1:
                 self.graph.addLine(x,y,x,heigh)
-                endTime = self.control.getEndExperimentTime()
+
                 endTime = endTime.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("Ends on {0}".format(endTime))
                 text.setPos(x,-22)
@@ -492,13 +498,13 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             if i == 0:
                 prevItem = item[0]
                 self.graph.addLine(x,y,x,heigh)
-                startedTime = actualTime.toString("dd.MM.yy hh:mm")
+                startedTime = startTime.toString("dd.MM.yy hh:mm")
                 self.updatedText = self.graph.addText("Updated on {0}".format(startedTime))
                 self.updatedText.setPos(-170, 0)
             ##add the hour when the condition change
             if prevItem != item[0]:
                 self.graph.addLine(x,-20,x,heigh)
-                hour = actualTime.addSecs(x*60)
+                hour = startTime.addSecs(x*60)
                 hour = hour.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("{0}".format(hour))
                 text.setPos(x,0)
@@ -510,6 +516,10 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.nowLine = self.graph.addLine(x,-20,x,heigh)
         self.nowText = self.graph.addText("Now")
         self.nowText.setPos(x,-22)
+
+        startTime = self.control.getStartExperimentTime()
+
+        endTime = self.control.getEndExperimentTime()
         now_counter = x
         for item in futureLightHistory:
             x = int(item[6])
@@ -531,7 +541,6 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.graph.addLine(x,y,x,(1-item[5])*heigh)
             elif item[0] == -1:
                 self.graph.addLine(x,y,x,heigh)
-                endTime = self.control.getEndExperimentTime()
                 endTime = endTime.toString("dd.MM.yy hh:mm")
                 text = self.graph.addText("Ends on {0}".format(endTime))
                 text.setPos(x,0)
@@ -540,8 +549,9 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             ##add the hour when the condition change
             if prevItem != item[0]:
                 self.graph.addLine(x,-20,x,heigh)
-                hour = actualTime.addSecs(x*60)
+                hour = startTime.addSecs(x*60)
                 hour = hour.toString("dd.MM.yy hh:mm")
+                print(x, x * 60, hour)
                 text = self.graph.addText("{0}".format(hour))
                 text.setPos(x,-22)
 
@@ -581,6 +591,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
             i=0
             heigh = 20
+
             for item in pastLightHistory:
                 x = int(item[6])
                 y = 0
@@ -727,11 +738,14 @@ class DialogUnlockIncubator(QtWidgets.QDialog):
 
 
 def main():
+    logging.basicConfig(filename='example.log', level=logging.DEBUG)
+    logging.info("started")
     app = QtWidgets.QApplication(sys.argv)
     LedController = ControlMainWindow()
     LedController.show()
     app.aboutToQuit.connect(LedController.stopExperiment)
     sys.exit(app.exec_())
+
 
 if __name__ == "__main__":
     main()

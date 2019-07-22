@@ -25,7 +25,7 @@ from threading import Thread
 import serial
 import serial.tools.list_ports
 import pickle
-
+import logging
 
 
 class Controller(Thread):
@@ -41,6 +41,7 @@ class Controller(Thread):
         self.isExperimentRunning = False
         self.currentPeriod = None
         self.startExperimentTime = None
+        self.prevData = None
 
     def run(self):
         try:
@@ -49,12 +50,14 @@ class Controller(Thread):
             self.startExperimentTime = time
             timer = QtCore.QElapsedTimer()
             isSerialOpen = self.openSerial(self.incubator)
-            print(isSerialOpen)
 
             if isSerialOpen:
+                logging.info("Experiment started at:{}".format(self.startExperimentTime.toString("dd.MM.yy hh:mm")))
                 self.mainController()
                 # timer to only call the function every minute.
+                logging.debug("Simulation started")
                 self.simulateExperiment(time)
+                logging.debug("Simulation ended")
                 self.isExperimentRunning = True
                 self.previousLightState = None
                 timer.start()
@@ -88,9 +91,9 @@ class Controller(Thread):
             # time since start in min
             startExperimentTime = self.startExperimentTime
         if self.isExperimentRunning:
-            timeSinceStart = self.startExperimentTime.secsTo(actualTime) / 60
+            timeSinceStart = self.startExperimentTime.secsTo(actualTime) / 60.
         else:
-            timeSinceStart = startExperimentTime.secsTo(actualTime) / 60
+            timeSinceStart = startExperimentTime.secsTo(actualTime) / 60.
         #currentDate = actualTime.date()
         currentPeriod = self.periodActive(actualTime)
 
@@ -161,6 +164,15 @@ class Controller(Thread):
                                                     rampPercent,
                                                     timeSinceStart])
                 else:
+                    logging.info("past_light:{},{},{},{},{},{},{},{}".format(
+                                 actualTime.toString("dd.MM.yy hh:mm"),
+                                 isLightsOn,
+                                 colour[0],
+                                 colour[1],
+                                 colour[2],
+                                 colour[3],
+                                 rampPercent,
+                                 timeSinceStart))
                     self.currentPeriod = currentPeriod
                     self.writeDataToArduino(isLightsOn, colour, period)
                     self.pastLightHistory.append([int(isLightsOn),
@@ -291,7 +303,7 @@ class Controller(Thread):
 
         self.previousLightState = actualLightState
 
-        print("lisght on?:",actualLightState)
+        #print("lisght on?:",actualLightState)
 
         return actualLightState
 
@@ -322,14 +334,14 @@ class Controller(Thread):
 
             if SNR != None:
                 if incubator['SN'] == SNR:
-                    print (port[0])
+                    logging.debug("port {}".format(port[0]))
                     self.ser = serial.Serial(port[0], 9600)
                     self.ser.write(b'C\r')
                     sleep(0.5)
                     res = self.ser.readline()
-                    print (res.find(b'Led controller'))
+                    #print (res.find(b'Led controller'))
                     if res.find(b'Led controller')>=0 :
-                        print("Arduino connected")
+                        logging.debug("Arduino connected")
                         # block the arduino during experimnent to prevent errors
                         f = open('config.cfg','rb')
                         incubators= pickle.load(f)
@@ -342,25 +354,30 @@ class Controller(Thread):
                             pickle.dump(incubators,f, pickle.HIGHEST_PROTOCOL)
                         return True
                     else:
-                        print("error, Not a Led controller")
+                        logging.debug("error, Not a Led controller")
                         self.ser.__del__()
                         self.isExperimentRunning = False
                         return False
 
     def checkArduinoAlive(self):
-        print("serial", self.ser.is_open)
+        logging.debug("serial open: {}".format(self.ser.is_open))
+        isconnected = True
         if not self.ser.is_open:
-            print("something, happend")
-            self.ser.__del__()
-            self.openSerial(self.incubator)
+            log_time = QtCore.QDateTime.currentDateTime()
+            loggin.warning("something, happend with arduino at {}".format(log_time.toString("dd.MM.yy hh:mm")))
+            self.closeSerial()
+            isconnected = self.openSerial(self.incubator)
 
-        return True
+        return isconnected
 
 
     def closeSerial(self):
-        if self.ser.is_open:
-            self.writeDataToArduino(False,[0,0,0,0])
-            self.ser.__del__()
+        try:
+            if self.ser.is_open:
+                self.writeDataToArduino(False,[0,0,0,0])
+                self.ser.__del__()
+        except Exception as e:
+            logging.error(e)
         with open('config.cfg','rb') as f:
             incubators= pickle.load(f)
             for i in incubators:
@@ -483,6 +500,8 @@ class Controller(Thread):
 
     def writeDataToArduino(self, on, colour, period=None):
         #colourIntensity = self.rampingProccesing(self.experiment[self.currentPeriod].isRampingOn)
+
+
         if not period:
             #there is no period because the experiment is finish
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
@@ -502,7 +521,10 @@ class Controller(Thread):
         else:
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
 
-        self.ser.write(bytes(data,'utf-8'))
+        # if data does not change avoid communication
+        if data != self.prevData:
+            self.ser.write(bytes(data,'utf-8'))
+            self.prevData = data
 
     def rampingProccesing(self, actualTime, on, period):
         rampPercent = 1
@@ -574,6 +596,9 @@ class Controller(Thread):
     def getFutureLightHistory(self):
         return self.futureLightHistory
 
+    def getStartExperimentTime(self):
+        return self.startExperimentTime
+
     def getEndExperimentTime(self):
         return self.endExperimentTime
 
@@ -582,5 +607,5 @@ class Controller(Thread):
 
     def setIsExperimentRunning(self, flag):
         self.isExperimentRunning = flag
-        print('running:',self.isExperimentRunning)
+        print('running:', self.isExperimentRunning)
         return self.isExperimentRunning
