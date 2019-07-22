@@ -30,6 +30,7 @@ import pickle
 import sys, threading, os
 from time import sleep
 import logging
+import glob
 
 
 if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
@@ -395,6 +396,9 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if r == QtWidgets.QDialog.Accepted:
             # takes the selected incubator
             incubatorName = d.dialog.listWidget.currentItem()
+            logging.basicConfig(filename='./logs/led_control_{}.log'.format(incubatorName.text()
+                                                                           ), level=logging.DEBUG)
+            logging.info("started")
             for incubator in incubators:
                 if str(incubatorName.text()) == str(incubator['name']):
                     self.control = Controller(self.exp.experiment, incubator)
@@ -738,8 +742,10 @@ class DialogUnlockIncubator(QtWidgets.QDialog):
 
 
 def main():
-    logging.basicConfig(filename='example.log', level=logging.DEBUG)
-    logging.info("started")
+    #cehck if led_control exists and pick a new file
+    if not os.path.exists("./logs"):
+        os.makedirs("./logs")
+    list_of_logs = glob.glob("./logs/*.log")
     app = QtWidgets.QApplication(sys.argv)
     LedController = ControlMainWindow()
     LedController.show()
