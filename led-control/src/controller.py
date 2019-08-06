@@ -557,7 +557,13 @@ class Controller(Thread):
         # if data does not change avoid communication
         if data != self.prevData or self.ser.port != self.prevport :
             #print("sending data to", self.ser.port)
-            self.ser.write(bytes(data,'utf-8'))
+            try:
+                self.ser.write(bytes(data,'utf-8'))
+            except Exception as e:
+                logging.error("error while writing data to Arduino: {}".format(e))
+                #try to reconnect
+                self.ser.close()
+                self.checkArduinoAlive()
             self.prevData = data
             self.prevport = self.ser.port
 
