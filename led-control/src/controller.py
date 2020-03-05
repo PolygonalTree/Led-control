@@ -167,7 +167,7 @@ class Controller(Thread):
                                                     rampPercent,
                                                     timeSinceStart])
                 else:
-                    logging.info("past_light:{},{},{},{},{},{},{},{}".format(
+                    logging.info("past_light:{},{},{},{},{},{},{},{},{},{}".format(
                                  actualTime.toString("dd.MM.yy hh:mm"),
                                  isLightsOn,
                                  colour[0],
@@ -175,6 +175,8 @@ class Controller(Thread):
                                  colour[2],
                                  colour[3],
                                  rampPercent,
+				 period.pulse[0],
+				 period.pulse[1],
                                  timeSinceStart))
                     self.currentPeriod = currentPeriod
                     self.writeDataToArduino(isLightsOn, colour, period)
@@ -338,7 +340,7 @@ class Controller(Thread):
             if SNR != None:
                 if incubator['SN'] == SNR:
                     logging.debug("port {}".format(port[0]))
-                    self.ser = serial.Serial(port[0], 9600, timeout=10)
+                    self.ser = serial.Serial(port[0], 9600, timeout=30)
                     self.ser.write(b'C\r')
                     sleep(0.5)
                     res = self.ser.readline()

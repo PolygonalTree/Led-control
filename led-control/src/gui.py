@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 """
-	Copyright (C) 2014  Luis Garcia Rodriguez
+    Copyright (C) 2014  Luis Garcia Rodriguez
 
-	This program is free software: you can redistribute it and/or modify
-	it under the terms of the GNU Affero General Public License as published
-	by the Free Software Foundation, either version 3 of the License, or
-	(at your option) any later version.
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as published
+    by the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-	This program is distributed in the hope that it will be useful,
-	but WITHOUT ANY WARRANTY; without even the implied warranty of
-	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-	GNU Affero General Public License for more details.
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
 
-	You should have received a copy of the GNU Affero General Public License
-	along with this program.  If not, see http://www.gnu.org/licenses.
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see http://www.gnu.org/licenses.
 
-	Email: luis.garcia@uni-muenster.de
+    Email: luis.garcia@uni-muenster.de
 
 """
 from PySide2 import QtCore, QtGui, QtSql
@@ -392,7 +392,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if r == QtWidgets.QDialog.Accepted:
             # takes the selected incubator
             incubatorName = d.dialog.listWidget.currentItem()
-            logging.basicConfig(filename='./logs/led_control_{}.log'.format(incubatorName.text()
+            logging.basicConfig(filename='/home/pi/Desktop/logs/led_control_{}.log'.format(incubatorName.text()
                                                                            ), level=logging.DEBUG)
             for incubator in incubators:
                 if str(incubatorName.text()) == str(incubator['name']):
@@ -733,9 +733,9 @@ class DialogUnlockIncubator(QtWidgets.QDialog):
 
 def main():
     #cehck if led_control exists and pick a new file
-    if not os.path.exists("./logs"):
-        os.makedirs("./logs")
-    list_of_logs = glob.glob("./logs/*.log")
+    if not os.path.exists("/home/pi/Desktop/logs"):
+        os.makedirs("/home/pi/Desktop/logs")
+    list_of_logs = glob.glob("/home/pi/Desktop/logs/*.log")
     app = QtWidgets.QApplication(sys.argv)
     LedController = ControlMainWindow()
     LedController.show()
