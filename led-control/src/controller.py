@@ -541,7 +541,6 @@ class Controller(Thread):
         if not period:
             #there is no period because the experiment is finish
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
-            print("not period {}".format(data))
         if on:
             if period.isPulseOn:
                 data = "R{0}G{1}B{2}W{3}F{4}/{5}\r".format(colour[0],
@@ -555,15 +554,10 @@ class Controller(Thread):
                                                     colour[1],
                                                     colour[2],
                                                     colour[3])
-            print("data on {}".format(data))
         else:
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
-            print("data off {}".format(data))
 
         # if data does not change avoid communication
-        print("Check data:{}".format(data))
-        print("Check prevdata:{}".format(self.prevData))
-
         if data != self.prevData or self.ser.port != self.prevport :
             print("sending data to", self.ser.port)
             try:
@@ -576,7 +570,7 @@ class Controller(Thread):
             self.prevData = data
             self.prevport = self.ser.port
         else:
-            print("Same data, not sending it to arduino.")
+            logging.info("Same data, not sending it to arduino.")
 
     def rampingProccesing(self, actualTime, on, period):
         rampPercent = 1
