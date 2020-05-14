@@ -61,8 +61,8 @@ void loop() {
 
     }else if (data == 'F'){
       lights[4] = Serial.parseFloat();
-      Serial.print("frec");
-      Serial.println(lights[4]);
+      //Serial.print("frec");
+      //Serial.println(lights[4]);
       if (lights[4]>=120000){
         t=millis();
       }else{
@@ -109,10 +109,10 @@ void loop() {
     if (time>=t){
       //error 
       error = time-t;
-      Serial.println(error);
+      //Serial.println(error);
       t = time + frec - error;
-      Serial.println(t);
-      Serial.println("burst start");
+      //Serial.println(t);
+      //Serial.println("burst start");
       //burst pulses
       burst=micros()+(lights[5]*1000.);
       counter = 0;
@@ -133,11 +133,11 @@ void loop() {
       //c code to switch off
       //PORTB = B00000000;
       //PORTD = B00000000;
-      Serial.println(micros());
-      Serial.println("burst end");
-      Serial.print("total time in burst");
-      Serial.println(burst-(lights[5]*1000.));
-      Serial.println(counter);
+      //Serial.println(micros());
+      //Serial.println("burst end");
+      //Serial.print("total time in burst");
+      //Serial.println(burst-(lights[5]*1000.));
+      //Serial.println(counter);
     newCommand= false;
     
     }
