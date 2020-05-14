@@ -74,15 +74,14 @@ class Controller(Thread):
                         # sleep to save cpu, if more than 0.2 it becomes apparently
                         # unresponsive for the user.
                     sleep(0.2)
-
                 self.closeSerial()
                 print("serial closed")
             else:
                 self.isExperimentRunning = False
 
         except Exception as e:
-            self.closeSerial()
             print(e)
+            self.closeSerial()
             self.isExperimentRunning = False
 
     def mainController(self, isSimulation=False, startExperimentTime=None, futureTime=None):
@@ -179,6 +178,7 @@ class Controller(Thread):
 				 period.pulse[1],
                                  timeSinceStart))
                     self.currentPeriod = currentPeriod
+                    print("period {}".format(period))
                     self.writeDataToArduino(isLightsOn, colour, period)
                     self.pastLightHistory.append([int(isLightsOn),
                                                   colour[0],
@@ -379,7 +379,9 @@ class Controller(Thread):
                 self.ser.write(b'C\r')
                 sleep(0.5)
                 res = self.ser.readline()
-                if res.find(b'Led controller') < 0:
+                #warning, this will not be check if pulses are active, workarround for error
+                #when frecuency for pulses is bigger than 1 min, correct this to something better
+                if res.find(b'Led controller') < 0 and self.prevData.find(F) < 0:
                     self.closeSerial()
                     isconnected = self.openSerial(self.incubator)
 
@@ -419,7 +421,6 @@ class Controller(Thread):
             for i in incubators:
                 if i['SN'] == self.incubator['SN']:
                     i.update(isRunning=False)
-                    
         with open('config.cfg', 'wb') as f:
             pickle.dump(incubators,f, pickle.HIGHEST_PROTOCOL)
 
@@ -540,6 +541,7 @@ class Controller(Thread):
         if not period:
             #there is no period because the experiment is finish
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
+            print("not period {}".format(data))
         if on:
             if period.isPulseOn:
                 data = "R{0}G{1}B{2}W{3}F{4}/{5}\r".format(colour[0],
@@ -553,12 +555,17 @@ class Controller(Thread):
                                                     colour[1],
                                                     colour[2],
                                                     colour[3])
+            print("data on {}".format(data))
         else:
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
+            print("data off {}".format(data))
 
         # if data does not change avoid communication
+        print("Check data:{}".format(data))
+        print("Check prevdata:{}".format(self.prevData))
+
         if data != self.prevData or self.ser.port != self.prevport :
-            #print("sending data to", self.ser.port)
+            print("sending data to", self.ser.port)
             try:
                 self.ser.write(bytes(data,'utf-8'))
             except Exception as e:
@@ -568,6 +575,8 @@ class Controller(Thread):
                 self.checkArduinoAlive()
             self.prevData = data
             self.prevport = self.ser.port
+        else:
+            print("Same data, not sending it to arduino.")
 
     def rampingProccesing(self, actualTime, on, period):
         rampPercent = 1
