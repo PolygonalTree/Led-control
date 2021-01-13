@@ -1,5 +1,5 @@
 //Pins R,G,B,W
-const int ledPins[] = {5,6,9,10};
+const int ledPins[] = {5,6,9,13};
 char data;
 int BrightnessValue = 0;
 //intensity 0-255, 0-255, 0-255, 0-255, Frecuency of pulses in miliseconds, width of pulse in miliseconds
@@ -67,6 +67,7 @@ void loop() {
         t=millis();
       }else{
         t=micros();
+        t=4294967295;
       }
       frec =lights[4]*1000.;
       //in microseconds
@@ -92,7 +93,7 @@ void loop() {
     
     }else if (data == 'C'){
         delay(100);
-       Serial.print("Led controller");
+       Serial.println("Led controller");
     }
   }     
   
@@ -106,17 +107,23 @@ void loop() {
       //Serial.println(time);
     }
     //time = micros();
-    if (time>=t){
+    if (t - time >= frec){
       //error 
-      error = time-t;
-      //Serial.println(error);
-      t = time + frec - error;
+      // limits error in case of overflow
+      error = min(time-t, 100);
+      //Serial.println(time);
+      //Serial.println(t);
+      t = time + frec -  error;
+      //Serial.println( time + frec -  error);
       //Serial.println(t);
       //Serial.println("burst start");
       //burst pulses
-      burst=micros()+(lights[5]*1000.);
+      burst=lights[5]*1000.;
       counter = 0;
-        while(micros()<=burst){
+        while(true){
+          if (micros() - time > burst){
+             break;
+           }
           analogWrite(5,lights[0]);
           analogWrite(6,lights[1]);
           analogWrite(9,lights[2]);
@@ -128,6 +135,7 @@ void loop() {
           analogWrite(10,0);
           delay(lights[6]); //resting delay
           counter += 1;
+          //Serial.println(counter);
         }
       
       //c code to switch off

@@ -26,6 +26,7 @@ void setup()
         pinMode(ledPins[i], OUTPUT);
         analogWrite(ledPins[i],0);
     }
+    pinMode(13, OUTPUT);
   //Welcome message
   Serial.println("Led controller");
 };
@@ -55,9 +56,9 @@ void loop() {
 
     }else if (data == 'F'){
       lights[4] = Serial.parseInt();
-      Serial.println(lights[4]);
+      //Serial.println(lights[4]);
       frec =lights[4]*1000.;
-      Serial.println(frec);
+      //Serial.println(frec);
       //in microseconds
       lights[5] = Serial.parseInt();
       pulses = true;

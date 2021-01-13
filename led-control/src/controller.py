@@ -67,8 +67,8 @@ class Controller(Thread):
                 while self.isExperimentRunning:
                     if timer.elapsed() > 60000:
                         # check serial is open
-                        self.checkArduinoAlive()
-                        sleep(0.2)
+                        #self.checkArduinoAlive()
+                        #sleep(0.2)
                         self.mainController()
                         timer.restart()
                         # sleep to save cpu, if more than 0.2 it becomes apparently
@@ -174,8 +174,9 @@ class Controller(Thread):
                                  colour[2],
                                  colour[3],
                                  rampPercent,
-				 period.pulse[0],
-				 period.pulse[1],
+                                 period.isPulseOn,
+				                 period.pulse[0],
+				                 period.pulse[1],
                                  timeSinceStart))
                     self.currentPeriod = currentPeriod
                     print("period {}".format(period))
@@ -364,7 +365,7 @@ class Controller(Thread):
                         self.isExperimentRunning = False
                         return False
 
-    def checkArduinoAlive(self):
+    def checkArduinoAlive(self, period = None):
         logging.debug("serial open: {}".format(self.ser.is_open))
         isconnected = True
         if not self.ser.is_open:
@@ -376,14 +377,35 @@ class Controller(Thread):
         else:
             # try to connect
             try:
-                self.ser.write(b'C\r')
-                sleep(0.5)
-                res = self.ser.readline()
-                #warning, this will not be check if pulses are active, workarround for error
-                #when frecuency for pulses is bigger than 1 min, correct this to something better
-                if res.find(b'Led controller') < 0 and self.prevData.find(F) < 0:
-                    self.closeSerial()
-                    isconnected = self.openSerial(self.incubator)
+                #warning, this will not check if pulses are active, work around for error
+                #when frequency for pulses is bigger than 1 min, correct this to something better
+                # If arduino is running a period with pulses the check will fail because the response will not arrive on time.
+                # So if the period running has pulses on it, lets wait until a response arrives, this does not make sense
+                # when the period does not have pulses active
+                if period.isPulseOn:
+                    count = 0
+                    #ask once every second.
+                    while count < period.pulse[0]/1000:
+                        self.ser.flushInput()
+                        self.ser.write(b'C\r')
+                        sleep(1)
+                        res = self.ser.readline()
+                        if res.find(b'Led controller') >= 0:
+                            isconnected = True
+                            break
+                        count += 1
+                    if res.find(b'Led controller') < 0:
+                        logging.warning("error while checking arduino with pulses. restarting serial")
+                        self.closeSerial()
+                        isconnected = self.openSerial(self.incubator)
+                else:
+                    self.ser.flushInput()
+                    self.ser.write(b'C\r')
+                    sleep(0.5)
+                    res = self.ser.readline()
+                    if res.find(b'Led controller') < 0:
+                        self.closeSerial()
+                        isconnected = self.openSerial(self.incubator)
 
             except IOError as e:
                 logging.error("Error on connecting to arduino {}".format(e))
@@ -539,7 +561,7 @@ class Controller(Thread):
 
 
         if not period:
-            #there is no period because the experiment is finish
+            #there is no period because the experiment is finished
             data = "R{0}G{1}B{2}W{3}N\r".format(0,0,0,0)
         if on:
             if period.isPulseOn:
@@ -566,7 +588,7 @@ class Controller(Thread):
                 logging.error("error while writing data to Arduino: {}".format(e))
                 #try to reconnect
                 self.ser.close()
-                self.checkArduinoAlive()
+                self.checkArduinoAlive(period)
             self.prevData = data
             self.prevport = self.ser.port
         else:
