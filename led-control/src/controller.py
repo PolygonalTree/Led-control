@@ -77,10 +77,12 @@ class Controller(Thread):
                 self.closeSerial()
                 print("serial closed")
             else:
+                logging.debug("stopping experiment, serial not open")
                 self.isExperimentRunning = False
 
         except Exception as e:
             print(e)
+            logging.error(f"something happened in run, error:{e}")
             self.closeSerial()
             self.isExperimentRunning = False
 
@@ -105,6 +107,7 @@ class Controller(Thread):
                     self.futureLightHistory.append([-1,0,0,0,0,0,timeSinceStart])
                     self.endExperimentTime = actualTime
                 else:
+                    logging.debug("Stopped, current period is None and is not simulation")
                     self.isExperimentRunning = False
 
             else:
@@ -179,7 +182,7 @@ class Controller(Thread):
 				                 period.pulse[1],
                                  timeSinceStart))
                     self.currentPeriod = currentPeriod
-                    print("period {}".format(period))
+                    #print("period {}".format(period))
                     self.writeDataToArduino(isLightsOn, colour, period)
                     self.pastLightHistory.append([int(isLightsOn),
                                                   colour[0],
@@ -190,6 +193,7 @@ class Controller(Thread):
                                                   timeSinceStart])
         except Exception as e:
             print(e)
+            logging.error(f"Error on main controller: {e}")
             self.closeSerial()
             self.isExperimentRunning = False
 

@@ -560,6 +560,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.graphicsView.show()
 
         if self.control.getIsExperimentRunning() == False:
+            logging.debug("Stopped in updatecurrentperiod")
             self.stopExperiment()
 
 
@@ -567,7 +568,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.periodUpdated == True:
             logging.info("updating at {}".format(QtCore.QDateTime.currentDateTime().toString("dd.MM.yy hh:mm")))
             self.control.simulateExperiment(QtCore.QDateTime.currentDateTime())
-            futureLightHistory = self.control.getFutureLightHistory()
+            #futureLightHistory = self.control.getFutureLightHistory()
             self.drawCurrentPeriod()
             self.periodUpdated = False
         else:
@@ -618,6 +619,7 @@ class ControlMainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             #logging.debug("updated")
 
         if self.control.getIsExperimentRunning() == False:
+            logging.debug("Stopped in updatecurrentperiod")
             self.stopExperiment()
 
     def simulation(self):
