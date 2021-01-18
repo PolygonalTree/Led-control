@@ -1,5 +1,5 @@
 //Pins R,G,B,W
-const int ledPins[] = {5,6,9,13};
+const int ledPins[] = {5,6,9,10};
 char data;
 int BrightnessValue = 0;
 //intensity 0-255, 0-255, 0-255, 0-255, Frecuency of pulses in miliseconds, width of pulse in miliseconds
